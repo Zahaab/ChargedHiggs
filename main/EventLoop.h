@@ -113,7 +113,7 @@ public:
 
    EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
              Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
-             Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000);
+             Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
    void Write(TDirectory *dir, std::string dirname);
    void FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_signal);
    void Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *is_tagged);
