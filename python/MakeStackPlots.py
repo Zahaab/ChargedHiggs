@@ -17,6 +17,7 @@ SetAtlasStyle()
 y_axis_label = "Event fraction"
 
 c_blue = TColor.GetColor("#3366ff")
+
 c_red = TColor.GetColor("#ee3311")
 c_orange = TColor.GetColor("#ff9900")
 

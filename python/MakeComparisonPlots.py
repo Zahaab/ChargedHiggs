@@ -9,19 +9,22 @@ from ROOT import *
 from array import *
 
 
-_, hmlb, hmub, wmlb, wmub = sys.argv
+_, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv = sys.argv
 
 
-def getChosenFiles(chosenFiles, path, hmlb, hmub, wmlb, wmub):
+def getChosenFiles(chosenFiles, path, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
+    graph_var = [hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                 jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv]
     varNums = path.split("_")[-1].replace(".root", "")
-    var1, var2, var3, var4 = varNums.split("-")
-    if hmlb in var1 and hmub in var2 and wmlb in var3 and wmub in var4:
+    path_var = varNums.split("-")
+    vardif = [i for i, j in zip(graph_var, path_var) if str(i) not in str(j)]
+    if vardif == []:
         for key in chosenFiles:
             if key in path:
                 chosenFiles[key] = path
 
 
-def getDataFiles(hmlb, hmub, wmlb, wmub):
+def getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
     chosenFiles = {"sig_Hplus_Wh_m400-0": 0,
                    "sig_Hplus_Wh_m800-0": 0,
                    "sig_Hplus_Wh_m1600-0": 0,
@@ -31,16 +34,27 @@ def getDataFiles(hmlb, hmub, wmlb, wmub):
                    "singleTop": 0}
     arr = os.listdir("../PlotFiles")
     for i in arr:
-        getChosenFiles(chosenFiles, i, hmlb, hmub, wmlb, wmub)
-
+        getChosenFiles(chosenFiles, i, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                       jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
     for key in chosenFiles:
         if chosenFiles[key] == 0:
             raise Exception("all files not found" + key)
     return chosenFiles
 
 
-files = getDataFiles(hmlb, hmub, wmlb, wmub)
+files = getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                     jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
 
+outputdir = "../Plots/" str(hmlb) + "-" + str(hmub) + "-" + str(wmlb) + "-" + str(wmub) + "-" + str(met_ptv) + "-" + str(lep_ptv) + "-" + str(jet0_ptv) + "-" +
+str(jet1_ptv) + "-" + str(lep_jet0_angle) + "-" + \
+    str(lep_jet1_angle) + "-" + str(hw_angle) + "-" + str(solo_jet_ptv)
+
+try:
+    os.mkdir(outputdir)
+except OSError:
+    print "Creation of the directory %s failed" % outputdir
+else:
+    print "Successfully created the directory %s " % outputdir
 
 gROOT.SetBatch(True)
 gStyle.SetOptStat(0)
@@ -221,5 +235,5 @@ for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_H
             c1.RedrawAxis()
             c1.Update()
             c1.RedrawAxis()
-            c1.SaveAs("../Plots/ShapePlot_%s_lvbb.pdf" % (HistoName +
-                                                          "_"+btagStrategy+"_"+hmlb+"-"+hmub+"-"+wmlb+"-"+wmub))
+            c1.SaveAs(outputdir + "/ShapePlot_%s_lvbb.pdf" %
+                      (HistoName + "_" + btagStrategy))
