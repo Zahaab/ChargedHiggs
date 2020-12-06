@@ -25,6 +25,8 @@
 
 #include "TH1Fs/TH1Fs.h"
 #include "TMVA/Reader.h"
+#include <unordered_map>
+#include <string>
 
 class EventLoop
 {
@@ -114,6 +116,7 @@ public:
    EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
              Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
              Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
+   EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map<std::string, std::string> config);
    void Write(TDirectory *dir, std::string dirname);
    void FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_signal);
    void Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *is_tagged);
@@ -173,6 +176,7 @@ public:
    TH1Fs *h_mWplus;
    TH1Fs *h_tagCategory;
    TH1Fs *h_mass_resolution;
+   TH1Fs *h_MET_over_sqrtHT;
 
    vector<double> m_EventWeights;
    vector<TString> m_UncNames;
@@ -238,10 +242,10 @@ public:
    float m_pTH_over_mvH;
    float m_ptW_over_mvH;
    // Higgs and W mass bounds
-   Float_t hm_lower_bound;
-   Float_t hm_upper_bound;
-   Float_t wm_lower_bound;
-   Float_t wm_upper_bound;
+   Float_t hmlb = 90.;
+   Float_t hmub = 140.;
+   Float_t wmlb = 70.;
+   Float_t wmub = 100.;
    // Variables for cuts, here is the key: What the value is called in the code, What it is called in physics, the lable I am using for it's value.
    // MET->pt(), missing transverse momentum, met_ptv,
    // Lepton4vector->Pt(), lepton transverse momentum, lep_ptv.
@@ -250,27 +254,43 @@ public:
    // FJets.at(0).DeltaR(*Lepton4vector), angle of fat bjet 0 and lepton, lep_jet0_angle,
    // m_DeltaPhi_HW, angle of higgs and wboson, hw_angle
    // FJets.at(0).Pt() in the seperate if statment, the single fat b jet when the othet dosn't generate, solo_jet_ptv
-   Float_t met_ptv;
-   Float_t lep_ptv;
-   Float_t jet0_ptv;
-   Float_t jet1_ptv;
-   Float_t lep_jet0_angle;
-   Float_t lep_jet1_angle;
-   Float_t hw_angle;
-   Float_t solo_jet_ptv;
+   Float_t met_ptv = 30000.;
+   Float_t lep_ptv = 30000.;
+   Float_t jet0_ptv = 200000.;
+   Float_t jet1_ptv = 200000.;
+   Float_t lep_jet0_angle = 1.0;
+   Float_t lep_jet1_angle = 1.0;
+   Float_t hw_angle = 2.5;
+   Float_t solo_jet_ptv = 250000.;
 };
 
 #endif
 
 #ifdef EventLoop_cxx
 
+EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map<std::string, std::string> config) : fChain(0)
+{
+   if (tree == 0)
+   {
+      std::cerr << "Error in EventLoop::EventLoop(): tree is nullptr" << std::endl;
+      return;
+   }
+
+   for (auto element : config)
+   {
+      std::cout << element.first << "=" << element.second << "\n";
+   }
+   std::cout << config.size();
+   throw;
+}
+
 EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
                      Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                      Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
-                                                               hm_lower_bound(hmlb),
-                                                               hm_upper_bound(hmub),
-                                                               wm_lower_bound(wmlb),
-                                                               wm_upper_bound(wmub),
+                                                               hmlb(hmlb),
+                                                               hmub(hmub),
+                                                               wmlb(wmlb),
+                                                               wmub(wmub),
                                                                met_ptv(met_ptv),
                                                                lep_ptv(lep_ptv),
                                                                jet0_ptv(jet0_ptv),
@@ -383,6 +403,7 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    h_mWplus = new TH1Fs(sampleName + "_mWplus", "", 30, 50, 200, mySel, m_UncNames, ExpUncertaintyName);
    h_tagCategory = new TH1Fs(sampleName + "_BtagCategory", "", 11, -0.5, 10.5, mySel, m_UncNames, ExpUncertaintyName);
    h_mass_resolution = new TH1Fs(sampleName + "_mass_resolution", "", 20, -1.0, 1.0, mySel, m_UncNames, ExpUncertaintyName);
+   h_MET_over_sqrtHT = new TH1Fs(sampleName + "_MET_over_rootHT", "", 30, 0, 600, mySel, m_UncNames, ExpUncertaintyName);
 
    // Set object pointer
    Description = 0;

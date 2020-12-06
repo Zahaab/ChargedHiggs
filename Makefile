@@ -13,7 +13,7 @@ all: $(BINS7) $(BINS9)
 
 $(BINS7): % : main.C
 	@echo -n "Building $@ ... "
-	$(CXX) $(CCFLAGS) $< -I$(IDIR) $(INCLUDE) $(LIBS) TH1Fs/TH1Fs.C main/EventLoop.C utilis/NeutrinoBuilder.C utilis/Chi2_minimization.C -o execute
+	$(CXX) $(CCFLAGS) $< -I$(IDIR) $(INCLUDE) $(LIBS) TH1Fs/TH1Fs.C main/EventLoop.C utilis/NeutrinoBuilder.C utilis/Chi2_minimization.C utilis/configparser.h -o execute
 	@echo "Done"
 
 clean:

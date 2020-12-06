@@ -102,20 +102,22 @@ for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_H
             print HistoName
             ReBin = False
             YAxisScale = 1.4
+            Xaxis_label = ""
 
             if "MET" in HistoName:
                 Xaxis_label = "Missing Transverse Momentum [GeV]"
-            if "METSig" in HistoName:
+            elif "METSig" in HistoName:
                 Xaxis_label = "E_{T}^{mis.} significance"
-            if "nJets" in HistoName:
+            elif "nJets" in HistoName:
                 Xaxis_label = "Jet Multiplicity"
-            if "nBTags" in HistoName:
-                Xaxis_label = "b-Tag Multiplicity"
-            if "Mwt" in HistoName:
+            elif "Mwt" in HistoName:
                 Xaxis_label = "Transverse W-boson Mass [GeV]"
-            if "HT_bjets" in HistoName:
+            elif "HT" == HistoName:
                 Xaxis_label = "Scalar Transverse Momentum Sum [GeV]"
-            Xaxis_label = ""
+            elif "HT_bjets" in HistoName:
+                Xaxis_label = "Scalar Transverse Momentum Sum [GeV]"
+            elif "nBTags" in HistoName:
+                Xaxis_label = "b-Tag Multiplicity"
 
             file1 = TFile.Open("../PlotFiles/" +
                                files["sig_Hplus_Wh_m400-0"], "READ")

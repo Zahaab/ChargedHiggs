@@ -7,6 +7,53 @@ import re
 from ROOT import *
 from array import *
 
+_, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv = sys.argv
+
+
+def getChosenFiles(chosenFiles, path, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
+    graph_var = [hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                 jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv]
+    varNums = path.split("_")[-1].replace(".root", "")
+    path_var = varNums.split("-")
+    vardif = [i for i, j in zip(graph_var, path_var) if str(i) not in str(j)]
+    if vardif == []:
+        for key in chosenFiles:
+            if key in path:
+                chosenFiles[key] = path
+
+
+def getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
+    chosenFiles = {"sig_Hplus_Wh_m400-0": 0,
+                   "sig_Hplus_Wh_m800-0": 0,
+                   "sig_Hplus_Wh_m1600-0": 0,
+                   "ttbarSherpa": 0,
+                   "Wjets": 0,
+                   "diboson": 0,
+                   "singleTop": 0}
+    arr = os.listdir("../PlotFiles")
+    for i in arr:
+        getChosenFiles(chosenFiles, i, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                       jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
+    for key in chosenFiles:
+        if chosenFiles[key] == 0:
+            raise Exception("all files not found" + key)
+    return chosenFiles
+
+
+files = getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
+                     jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
+
+outputdir = "../Plots/" str(hmlb) + "-" + str(hmub) + "-" + str(wmlb) + "-" + str(wmub) + "-" + str(met_ptv) + "-" + str(lep_ptv) + "-" + str(jet0_ptv) + "-" +
+str(jet1_ptv) + "-" + str(lep_jet0_angle) + "-" + \
+    str(lep_jet1_angle) + "-" + str(hw_angle) + "-" + str(solo_jet_ptv)
+
+try:
+    os.mkdir(outputdir)
+except OSError:
+    print "Creation of the directory %s failed" % outputdir
+else:
+    print "Successfully created the directory %s " % outputdir
+
 gROOT.SetBatch(True)
 gStyle.SetOptStat(0)
 gStyle.SetPalette(1)
@@ -15,9 +62,7 @@ gROOT.LoadMacro("../style/AtlasUtils.C")
 SetAtlasStyle()
 
 y_axis_label = "Event fraction"
-
 c_blue = TColor.GetColor("#3366ff")
-
 c_red = TColor.GetColor("#ee3311")
 c_orange = TColor.GetColor("#ff9900")
 
@@ -45,11 +90,12 @@ def NormalizeHisto(histo):
 
 c1 = TCanvas("ShapePlots", "", 720, 720)
 
-# for HistoName in ["MET","METSig","nJets","Mwt","HT","HT_bjets","DeltaPhi_HW","mVH","Lepton_Pt","Lepton_Eta"]:
-for HistoName in ["Mwt", "Lepton_Pt", "HT", "mVH"]:
-    for Region in ["Resolved_LepP_SR", "Resolved_LepP_CR"]:
-        for btagStrategy in ["TwoTags", "ThreeTags"]:
-
+# for HistoName in ["Mwt", "Lepton_Pt", "HT", "mVH"]:
+#    for Region in ["Resolved_LepP_SR", "Resolved_LepP_CR"]:
+#        for btagStrategy in ["TwoTags", "ThreeTags"]:
+for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_HW", "mVH", "Lepton_Pt", "Lepton_Eta"]:
+    for Region in ["Merged_LepN_SR"]:
+        for btagStrategy in ["FourPlusTags", "ThreeTags", "TwoTags"]:
             ReBin = False
             YAxisScale = 1.4
 
@@ -93,6 +139,7 @@ for HistoName in ["Mwt", "Lepton_Pt", "HT", "mVH"]:
                 "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
             h_sig_Hplus_m400e = dir1e.Get(
                 "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+            # is there a reason a scale isn't used
             h_sig_Hplus_m400d.Scale(dscale)
             h_sig_Hplus_m400e.Scale(escale)
             h_sig_Hplus_m400 = h_sig_Hplus_m400a+h_sig_Hplus_m400d+h_sig_Hplus_m400e

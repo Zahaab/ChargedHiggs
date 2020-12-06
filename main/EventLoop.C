@@ -59,16 +59,16 @@ void EventLoop::Loop()
         {
             if (Lepton_Charge > 0)
             {
-                if ((Higgs.M() * 0.001 > hm_lower_bound && Higgs.M() * 0.001 < hm_upper_bound))
+                if ((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
                     pass_sel["Merged_LepP_SR"] = true;
-                if (!(Higgs.M() * 0.001 > hm_lower_bound && Higgs.M() * 0.001 < hm_upper_bound))
+                if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
                     pass_sel["Merged_LepP_CR"] = true;
             }
             else if (Lepton_Charge < 0)
             {
-                if (((Higgs.M() * 0.001 > hm_lower_bound && Higgs.M() * 0.001 < hm_upper_bound) && (Wplus.M() * 0.001 > wm_lower_bound && Wplus.M() * 0.001 < wm_upper_bound)))
+                if (((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
                     pass_sel["Merged_LepN_SR"] = true;
-                if (!((Higgs.M() * 0.001 > hm_lower_bound && Higgs.M() * 0.001 < hm_upper_bound) && (Wplus.M() * 0.001 > wm_lower_bound && Wplus.M() * 0.001 < wm_upper_bound)))
+                if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
                     pass_sel["Merged_LepN_CR"] = true;
             }
         }
@@ -126,6 +126,7 @@ void EventLoop::Loop()
             h_mWplus->Fill(Wplus.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
             h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
+            h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
         }
         ////WriteMVAInput();
     }
@@ -503,7 +504,7 @@ void EventLoop::Set_Jet_observables()
 }
 
 bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
-                                          Float_t hw_angle, Float solo_jet_ptv)
+                                          Float_t hw_angle, Float_t solo_jet_ptv)
 {
     if (MET->Pt() < met_ptv)
         return false;
@@ -700,6 +701,7 @@ void EventLoop::Write(TDirectory *dir, std::string dirname)
     h_maxMVAResponse->Write(dir, ("maxMVAResponse"));
     h_tagCategory->Write(dir, ("BtagCategory"));
     h_mass_resolution->Write(dir, ("mass_resolution"));
+    h_MET_over_sqrtHT->Write(dir, ("MET_over_rootHT"));
     dir->cd();
     m_myTree->Write();
 }
