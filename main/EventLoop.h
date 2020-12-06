@@ -116,7 +116,9 @@ public:
    EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
              Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
              Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
+
    EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map<std::string, std::string> config);
+
    void Write(TDirectory *dir, std::string dirname);
    void FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_signal);
    void Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *is_tagged);
@@ -276,12 +278,91 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
       return;
    }
 
-   for (auto element : config)
+   if (config["Higgs_mass_lower_bound"] != "")
    {
-      std::cout << element.first << "=" << element.second << "\n";
+      hmlb = std::stof(config["Higgs_mass_lower_bound"]);
    }
-   std::cout << config.size();
+   if (config["Higgs_mass_upper_bound"] != "")
+   {
+      hmub = std::stof(config["Higgs_mass_upper_bound"]);
+   }
+   if (config["Wboson_mass_lower_bound"] != "")
+   {
+      wmlb = std::stof(config["Wboson_mass_lower_bound"]);
+   }
+   if (config["Wboson_mass_upper_bound"] != "")
+   {
+      wmub = std::stof(config["Wboson_mass_upper_bound"]);
+   }
+   if (config["Higgs_Wboson_angle"] != "")
+   {
+      hw_angle = std::stof(config["Higgs_Wboson_angle"]);
+   }
+   if (config["Missing_transverse_momentum"] != "")
+   {
+      met_ptv = std::stof(config["Missing_transverse_momentum"]);
+   }
+   if (config["Lepton_transverse_momentum"] != "")
+   {
+      lep_ptv = std::stof(config["Lepton_transverse_momentum"]);
+   }
+   if (config["2Jets_Jet1_transverse_momentum"] != "")
+   {
+      jet0_ptv = std::stof(config["2Jets_Jet1_transverse_momentum"]);
+   }
+   if (config["2Jets_Jet2_transverse_momentum"] != "")
+   {
+      jet1_ptv = std::stof(config["2Jets_Jet2_transverse_momentum"]);
+   }
+   if (config["2Jets_Jet1_lepton_angle"] != "")
+   {
+      lep_jet0_angle = std::stof(config["2Jets_Jet1_lepton_angle"]);
+   }
+   if (config["2Jets_Jet2_lepton_angle"] != "")
+   {
+      lep_jet1_angle = std::stof(config["2Jets_Jet2_lepton_angle"]);
+   }
+   if (config["1Jet_Jet_transverse_momentum"] != "")
+   {
+      solo_jet_ptv = std::stof(config["1Jet_Jet_transverse_momentum"]);
+   }
+
+   std::cout << hmlb << "\n";
+
+   TString WP = config["WP"];
+
+   m_btagCut_value_trkJets = -1.;
+   if (WP == "85p")
+   {
+      m_btagCut_value_trkJets = 0.05;
+      m_btagCut_value_CaloJets = 0.11;
+      m_btagCategoryBin = 1;
+   }
+   if (WP == "77p")
+   {
+      m_btagCut_value_trkJets = 0.58;
+      m_btagCut_value_CaloJets = 0.64;
+      m_btagCategoryBin = 2;
+   }
+   if (WP == "70p")
+   {
+      m_btagCut_value_trkJets = 0.79;
+      m_btagCut_value_CaloJets = 0.83;
+      m_btagCategoryBin = 3;
+   }
+   if (WP == "60p")
+   {
+      m_btagCut_value_trkJets = 0.92;
+      m_btagCut_value_CaloJets = 0.94;
+      m_btagCategoryBin = 4;
+   }
+
+   // std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
+   // std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
+   //           << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
+   // std::cout << m_btagCut_value_trkJets << "\n";
    throw;
+   Init(tree, config["sampleName"], ExpUncertaintyName);
 }
 
 EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
