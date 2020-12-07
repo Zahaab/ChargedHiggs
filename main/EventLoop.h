@@ -364,10 +364,10 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
       m_btagCategoryBin = 4;
    }
 
-   std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
-   std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
-             << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
-   std::cout << m_btagCut_value_trkJets << "\n";
+   // std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
+   // std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
+   //           << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
+   // std::cout << m_btagCut_value_trkJets << "\n";
    Init(tree, SampleName, ExpUncertaintyName);
 }
 
