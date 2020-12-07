@@ -326,9 +326,16 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
    {
       solo_jet_ptv = std::stof(config["1Jet_Jet_transverse_momentum"]);
    }
+   if (config["SampleName"] == "")
+   {
+      throw std::runtime_error(std::string("Error: No SampleName given"));
+   }
+   if (config["WP"] == "")
+   {
+      throw std::runtime_error(std::string("Error: No WP given"));
+   }
 
-   std::cout << hmlb << "\n";
-
+   TString SampleName = config["SampleName"];
    TString WP = config["WP"];
 
    m_btagCut_value_trkJets = -1.;
@@ -357,12 +364,11 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
       m_btagCategoryBin = 4;
    }
 
-   // std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
-   // std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
-   //           << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
-   // std::cout << m_btagCut_value_trkJets << "\n";
-   throw;
-   Init(tree, config["sampleName"], ExpUncertaintyName);
+   std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
+   std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
+             << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
+   std::cout << m_btagCut_value_trkJets << "\n";
+   Init(tree, SampleName, ExpUncertaintyName);
 }
 
 EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
