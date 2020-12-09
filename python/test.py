@@ -32,7 +32,3 @@ def getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, l
         if chosenFiles[key] == 0:
             raise Exception("all files not found" + key)
     return chosenFiles
-
-
-files = getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
-                     jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)

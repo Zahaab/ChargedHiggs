@@ -2,6 +2,7 @@
 #define CONFIGPARSER_H
 #include <unordered_map>
 #include <string>
+#include <vector>
 #include <fstream>
 #include <algorithm>
 
@@ -25,6 +26,50 @@ std::unordered_map<std::string, std::string> parseConfig(std::string path)
         configuration[key] = value;
     }
     return configuration;
+}
+
+std::vector<std::string> parseDataPeriodes(std::unordered_map<std::string, std::string> config)
+{
+    std::string path = config["path"];
+    std::vector<std::string> MCDataPeriodes;
+
+    if (path.find("MC16a") != std::string::npos)
+    {
+        MCDataPeriodes.push_back("MC16a");
+        if (config["StackM16d"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16d");
+        }
+        if (config["StackM16e"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16e");
+        }
+    }
+    if (path.find("MC16d") != std::string::npos)
+    {
+        MCDataPeriodes.push_back("MC16d");
+        if (config["StackM16a"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16a");
+        }
+        if (config["StackM16e"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16e");
+        }
+    }
+    if (path.find("MC16e") != std::string::npos)
+    {
+        MCDataPeriodes.push_back("MC16e");
+        if (config["StackM16d"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16d");
+        }
+        if (config["StackM16a"] == "Enable")
+        {
+            MCDataPeriodes.push_back("MC16a");
+        }
+    }
+    return MCDataPeriodes;
 }
 
 #endif

@@ -1,5 +1,5 @@
 path = data/MC16a
-SampleName = Wjets.root
+SampleName = sig_Hplus_Wh_m800-0.root
 WP = 77p
 OUTPUTDIR = /home/ap17080/projects/test
 batchMode = 0
