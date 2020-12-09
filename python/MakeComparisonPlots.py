@@ -11,7 +11,7 @@ from configparser import configParser, getConfigData, getPlotFiles, getXaxisLabe
 
 _, config_path = sys.argv
 
-config = confifParser(config_path)
+config = configParser(config_path)
 MCDataPeriodes = getConfigData(config, "Stack_")
 histoNames = getConfigData(config, "Graph_")
 btagStrategies = getConfigData(config, "Btag_")
@@ -74,7 +74,10 @@ for i in MCDataPeriodes:
             for btagStrategy in btagStrategies:
                 # for btagStrategy in ["TwoTags"]:
                 # print(HistoName)
-                ReBin = True
+                if config[Graph_Rebin] = "Enable":
+                    ReBin = True
+                else:
+                    ReBin = False
                 YAxisScale = 1.4
                 Xaxis_label = getXaxisLabel(HistoName)
                 h_other_backgroundlist = []

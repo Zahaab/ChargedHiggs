@@ -6,46 +6,24 @@ import math
 import re
 from ROOT import *
 from array import *
+from configparser import configParser, getConfigData, getPlotFiles, getXaxisLabel
 
-_, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv = sys.argv
+_, config_path = sys.argv
 
+config = configParser(config_path)
+MCDataPeriodes = getConfigData(config, "Stack_")
+histoNames = getConfigData(config, "Graph_")
+btagStrategies = getConfigData(config, "Btag_")
+dataPeriodeStack = "-".join(MCDataPeriodes)
+histoFiles = {i: getPlotFiles(config, i) for i in MCDataPeriodes}
+plotEvents = getConfigData(config, "Plot_")
 
-def getChosenFiles(chosenFiles, path, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
-    graph_var = [hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
-                 jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv]
-    varNums = path.split("_")[-1].replace(".root", "")
-    path_var = varNums.split("-")
-    vardif = [i for i, j in zip(graph_var, path_var) if str(i) not in str(j)]
-    if vardif == []:
-        for key in chosenFiles:
-            if key in path:
-                chosenFiles[key] = path
-
-
-def getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv):
-    chosenFiles = {"sig_Hplus_Wh_m400-0": 0,
-                   "sig_Hplus_Wh_m800-0": 0,
-                   "sig_Hplus_Wh_m1600-0": 0,
-                   "ttbarSherpa": 0,
-                   "Wjets": 0,
-                   "diboson": 0,
-                   "singleTop": 0}
-    arr = os.listdir("../PlotFiles")
-    for i in arr:
-        getChosenFiles(chosenFiles, i, hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
-                       jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
-    for key in chosenFiles:
-        if chosenFiles[key] == 0:
-            raise Exception("all files not found" + key)
-    return chosenFiles
-
-
-files = getDataFiles(hmlb, hmub, wmlb, wmub, met_ptv, lep_ptv,
-                     jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv)
-
-outputdir = "../Plots/" str(hmlb) + "-" + str(hmub) + "-" + str(wmlb) + "-" + str(wmub) + "-" + str(met_ptv) + "-" + str(lep_ptv) + "-" + str(jet0_ptv) + "-" +
-str(jet1_ptv) + "-" + str(lep_jet0_angle) + "-" + \
-    str(lep_jet1_angle) + "-" + str(hw_angle) + "-" + str(solo_jet_ptv)
+outputdir = "../Plots/" + config["WP"] + "/" + "StackPlots" + "/" + dataPeriodeStack + "-" + config["Higgs_mass_lower_bound"] + "-" + config["Higgs_mass_upper_bound"] + "-" +
+config["Wboson_mass_lower_bound"] + "-" + config["Wboson_mass_upper_bound"] + "-" + config["Missing_transverse_momentum"] + "-" +
+config["Lepton_transverse_momentum"] + "-" + config["2Jets_Jet1_transverse_momentum"] + "-" +
+config["2Jets_Jet2_transverse_momentum"] + "-" + config["2Jets_Jet1_lepton_angle"] + "-" + config["2Jets_Jet2_lepton_angle"] + "-" +
+config["Higgs_Wboson_angle"] + "-" + \
+    config["1Jet_Jet_transverse_momentum"]
 
 try:
     os.mkdir(outputdir)
@@ -93,254 +71,357 @@ c1 = TCanvas("ShapePlots", "", 720, 720)
 # for HistoName in ["Mwt", "Lepton_Pt", "HT", "mVH"]:
 #    for Region in ["Resolved_LepP_SR", "Resolved_LepP_CR"]:
 #        for btagStrategy in ["TwoTags", "ThreeTags"]:
-for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_HW", "mVH", "Lepton_Pt", "Lepton_Eta"]:
+for HistoName in histoNames:
     for Region in ["Merged_LepN_SR"]:
-        for btagStrategy in ["FourPlusTags", "ThreeTags", "TwoTags"]:
-            ReBin = False
+        for btagStrategy in btagStrategies:
+            if config[Graph_Rebin] = "Enable":
+                    ReBin = True
+                else:
+                    ReBin = False
             YAxisScale = 1.4
-
-            if "MET" in HistoName:
-                Xaxis_label = "Missing Transverse Momentum [GeV]"
-            elif "METSig" in HistoName:
-                Xaxis_label = "E_{T}^{mis.} significance"
-            elif "nJets" in HistoName:
-                Xaxis_label = "Jet Multiplicity"
-            elif "nBTags" in HistoName:
-                Xaxis_label = "b-Tag Multiplicity"
-            elif "Mwt" in HistoName:
-                Xaxis_label = "Transverse W-boson Mass [GeV]"
-            elif "mVH" in HistoName:
-                Xaxis_label = "m_{Wh}[GeV]"
-            elif "Lepton_Pt" in HistoName:
-                Xaxis_label = "Lepton Transverse Momentum[GeV]"
-            elif "HT" in HistoName:
-                Xaxis_label = "Scalar Transverse Momentum Sum [GeV]"
-            elif "HT_bjets" in HistoName:
-                Xaxis_label = "Scalar Transverse Momentum Sum [GeV]"
-            else:
-                Xaxis_label = ""
+            Xaxis_label = getXaxisLabel(HistoName)
 
             # correct problem in maker: wrong normalisation
             dscale = 1.223695
             escale = 1.61419497
+            h_other_background_list = []
+            h_ttbar_background = []
 
-            file1a = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m400-0_77p_MC16a.root", "READ")
-            file1d = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m400-0_77p_MC16d.root", "READ")
-            file1e = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m400-0_77p_MC16e.root", "READ")
-            dir1a = file1a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir1d = file1d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir1e = file1e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_sig_Hplus_m400a = dir1a.Get(
-                "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m400d = dir1d.Get(
-                "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m400e = dir1e.Get(
-                "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            # is there a reason a scale isn't used
-            h_sig_Hplus_m400d.Scale(dscale)
-            h_sig_Hplus_m400e.Scale(escale)
-            h_sig_Hplus_m400 = h_sig_Hplus_m400a+h_sig_Hplus_m400d+h_sig_Hplus_m400e
-            h_sig_Hplus_m400.SetLineColor(kBlack)
-            h_sig_Hplus_m400.SetLineStyle(7)
-            if ReBin == True:
-                h_sig_Hplus_m400.Rebin(2)
+            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                h_sig_Hplus_m400list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file1a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["sig_Hplus_Wh_m400-0"], "READ")
+                    dir1a = file1a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m400a = dir1a.Get(
+                    "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m400list.append(h_sig_Hplus_m400a)
+                if config["Stack_MC16d"] == "Enable":
+                    file1d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["sig_Hplus_Wh_m400-0"], "READ")
+                    dir1d = file1d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m400d = dir1d.Get(
+                    "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m400d.Scale(dscale)
+                    h_sig_Hplus_m400list.append(h_sig_Hplus_m400d)
+                if config["Stack_MC16e"] == "Enable":
+                    file1e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["sig_Hplus_Wh_m400-0"], "READ")
+                    dir1e = file1e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_sig_Hplus_m400e = dir1e.Get(
+                    "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m400e.Scale(escale)
+                    h_sig_Hplus_m400list.append(h_sig_Hplus_m400e)           
+            
+                h_sig_Hplus_m400 = sum(h_sig_Hplus_m400list)
+                h_sig_Hplus_m400.SetLineColor(kBlack)
+                h_sig_Hplus_m400.SetLineStyle(7)
+                if ReBin == True:
+                    h_sig_Hplus_m400.Rebin(2)
 
-            file7a = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m800-0_77p_MC16a.root", "READ")
-            file7d = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m800-0_77p_MC16d.root", "READ")
-            file7e = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m800-0_77p_MC16e.root", "READ")
-            dir7a = file7a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir7d = file7d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir7e = file7e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_sig_Hplus_m800a = dir7a.Get(
-                "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m800d = dir7d.Get(
-                "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m800e = dir7e.Get(
-                "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m800d.Scale(dscale)
-            h_sig_Hplus_m800e.Scale(escale)
-            h_sig_Hplus_m800 = h_sig_Hplus_m800a+h_sig_Hplus_m800d+h_sig_Hplus_m800e
-            h_sig_Hplus_m800.SetLineColor(kBlue)
-            h_sig_Hplus_m800.SetLineStyle(7)
-            if ReBin == True:
-                h_sig_Hplus_m800.Rebin(2)
+            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                h_sig_Hplus_m800list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file2a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["sig_Hplus_Wh_m800-0"], "READ")
+                    dir1a = file2a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m800a = dir1a.Get(
+                    "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m800list.append(h_sig_Hplus_m800a)
+                if config["Stack_MC16d"] == "Enable":
+                    file2d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["sig_Hplus_Wh_m800-0"], "READ")
+                    dir1d = file2d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m800d = dir1d.Get(
+                    "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m800d.Scale(dscale)
+                    h_sig_Hplus_m800list.append(h_sig_Hplus_m800d)
+                if config["Stack_MC16e"] == "Enable":
+                    file2e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["sig_Hplus_Wh_m800-0"], "READ")
+                    dir1e = file2e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_sig_Hplus_m800e = dir1e.Get(
+                    "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m800e.Scale(escale)
+                    h_sig_Hplus_m800list.append(h_sig_Hplus_m800e)           
+            
+                h_sig_Hplus_m800 = sum(h_sig_Hplus_m800list)
+                h_sig_Hplus_m800.SetLineColor(kBlue)
+                h_sig_Hplus_m800.SetLineStyle(7)
+                if ReBin == True:
+                    h_sig_Hplus_m800.Rebin(2)
+            
+            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                h_sig_Hplus_m1600list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m1600a = dir1a.Get(
+                    "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m1600list.append(h_sig_Hplus_m1600a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_sig_Hplus_m1600d = dir1d.Get(
+                    "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m1600d.Scale(dscale)
+                    h_sig_Hplus_m1600list.append(h_sig_Hplus_m1600d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_sig_Hplus_m1600e = dir1e.Get(
+                    "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_sig_Hplus_m1600e.Scale(escale)
+                    h_sig_Hplus_m1600list.append(h_sig_Hplus_m1600e)           
+            
+                h_sig_Hplus_m1600 = sum(h_sig_Hplus_m1600list)
+                h_sig_Hplus_m1600.SetLineColor(kViolet)
+                h_sig_Hplus_m1600.SetLineStyle(7)
+                if ReBin == True:
+                    h_sig_Hplus_m1600.Rebin(2)
+            
+            if config["Plot_ttbar"] == "Enable":
+                h_ttbar_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["ttbar"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_ttbar_background_a = dir1a.Get(
+                    "ttbar_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbar_background_list.append(h_ttbar_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["ttbar"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_ttbar_background_d = dir1d.Get(
+                    "ttbar_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbar_background_d.Scale(dscale)
+                    h_ttbar_background_list.append(h_ttbar_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["ttbar"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_ttbar_background_e = dir1e.Get(
+                    "ttbar_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbar_background_e.Scale(escale)
+                    h_ttbar_background_list.append(h_ttbar_background_e)           
+            
+                h_ttbar_background = sum(h_ttbar_background_list)
+                h_ttbar_background.SetLineColor(kGreen+3)
+                if ReBin == True:
+                    h_ttbar_background.Rebin(2)
 
-            file8a = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m1600-0_77p_MC16a.root", "READ")
-            file8d = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m1600-0_77p_MC16d.root", "READ")
-            file8e = TFile.Open(
-                "../PlotFiles/sig_Hplus_Wh_m1600-0_77p_MC16e.root", "READ")
-            dir8a = file8a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir8d = file8d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir8e = file8e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_sig_Hplus_m1600a = dir8a.Get(
-                "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m1600d = dir8d.Get(
-                "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m1600e = dir8e.Get(
-                "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_sig_Hplus_m1600d.Scale(dscale)
-            h_sig_Hplus_m1600e.Scale(escale)
-            h_sig_Hplus_m1600 = h_sig_Hplus_m1600a+h_sig_Hplus_m1600d+h_sig_Hplus_m1600e
-            h_sig_Hplus_m1600.SetLineColor(kViolet)
-            h_sig_Hplus_m1600.SetLineStyle(7)
-            if ReBin == True:
-                h_sig_Hplus_m1600.Rebin(2)
+            elif config["Plot_ttbarSherpa"] == "Enable":
+                h_ttbarSherpa_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["ttbarSherpa"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_ttbarSherpa_background_a = dir1a.Get(
+                    "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbarSherpa_background_list.append(h_ttbarSherpa_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["ttbarSherpa"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_ttbarSherpa_background_d = dir1d.Get(
+                    "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbarSherpa_background_d.Scale(dscale)
+                    h_ttbarSherpa_background_list.append(h_ttbarSherpa_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["ttbarSherpa"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_ttbarSherpa_background_e = dir1e.Get(
+                    "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_ttbarSherpa_background_e.Scale(escale)
+                    h_ttbarSherpa_background_list.append(h_ttbarSherpa_background_e)           
+            
+                h_ttbar_background = sum(h_ttbarSherpa_background_list)
+                h_ttbar_background.SetLineColor(kGreen+3)
+                if ReBin == True:
+                    h_ttbar_background.Rebin(2)
 
-            file2a = TFile.Open(
-                "../PlotFiles/ttbarSherpa_77p_MC16a.root", "READ")
-            file2d = TFile.Open(
-                "../PlotFiles/ttbarSherpa_77p_MC16d.root", "READ")
-            file2e = TFile.Open(
-                "../PlotFiles/ttbarSherpa_77p_MC16d.root", "READ")
-            dir2a = file2a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir2d = file2d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir2e = file2e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_ttbar_background_a = dir2a.Get(
-                "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_ttbar_background_d = dir2d.Get(
-                "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_ttbar_background_e = dir2e.Get(
-                "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_ttbar_background_d.Scale(dscale)
-            h_ttbar_background_e.Scale(escale)
-            h_ttbar_background = h_ttbar_background_a + \
-                h_ttbar_background_d+h_ttbar_background_e
-            h_ttbar_background.SetLineColor(kGreen+3)
-            if ReBin == True:
-                h_ttbar_background.Rebin(2)
+            if config["Plot_Wjets"] == "Enable":
+                h_Wjets_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["Wjets"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_Wjets_background_a = dir1a.Get(
+                    "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Wjets_background_list.append(h_Wjets_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["Wjets"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_Wjets_background_d = dir1d.Get(
+                    "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Wjets_background_d.Scale(dscale)
+                    h_Wjets_background_list.append(h_Wjets_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["Wjets"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_Wjets_background_e = dir1e.Get(
+                    "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Wjets_background_e.Scale(escale)
+                    h_Wjets_background_list.append(h_Wjets_background_e)           
+            
+                h_Wjets_background = sum(h_Wjets_background_list)
+                h_Wjets_background.SetLineColor(kRed-3)
+                if ReBin == True:
+                    h_Wjets_background.Rebin(2)
+                h_other_background_list.append(h_Wjets_background)
 
-            file3a = TFile.Open("../PlotFiles/Wjets_77p_MC16a.root", "READ")
-            file3d = TFile.Open("../PlotFiles/Wjets_77p_MC16d.root", "READ")
-            file3e = TFile.Open("../PlotFiles/Wjets_77p_MC16e.root", "READ")
-            dir3a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir3d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir3e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_W_background_a = dir3a.Get(
-                "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_W_background_d = dir3d.Get(
-                "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_W_background_e = dir3e.Get(
-                "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_W_background_d.Scale(dscale)
-            h_W_background_e.Scale(escale)
-            h_W_background = h_W_background_a+h_W_background_d+h_W_background_e
-            h_W_background.SetLineColor(kRed-3)
-            if ReBin == True:
-                h_W_background.Rebin(2)
+            if config["Plot_Zjets"] == "Enable":
+                h_Zjets_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["Zjets"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_Zjets_background_a = dir1a.Get(
+                    "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Zjets_background_list.append(h_Zjets_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["Zjets"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_Zjets_background_d = dir1d.Get(
+                    "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Zjets_background_d.Scale(dscale)
+                    h_Zjets_background_list.append(h_Zjets_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["Zjets"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_Zjets_background_e = dir1e.Get(
+                    "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_Zjets_background_e.Scale(escale)
+                    h_Zjets_background_list.append(h_Zjets_background_e)           
+            
+                h_Zjets_background = sum(h_Zjets_background_list)
+                h_Zjets_background.SetLineColor(kRed-3)
+                if ReBin == True:
+                    h_Zjets_background.Rebin(2)
+                h_other_background_list.append(h_Zjets_background)
 
-            file4a = TFile.Open("../PlotFiles/Zjets_77p_MC16a.root", "READ")
-            file4d = TFile.Open("../PlotFiles/Zjets_77p_MC16d.root", "READ")
-            file4e = TFile.Open("../PlotFiles/Zjets_77p_MC16e.root", "READ")
-            dir4a = file4a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir4d = file4d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir4e = file4e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_Z_background_a = dir4a.Get(
-                "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_Z_background_d = dir4d.Get(
-                "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_Z_background_e = dir4e.Get(
-                "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_Z_background_d.Scale(dscale)
-            h_Z_background_e.Scale(escale)
-            h_Z_background = h_Z_background_a+h_Z_background_d+h_Z_background_e
-            h_Z_background.SetLineColor(kRed-3)
-            if ReBin == True:
-                h_Z_background.Rebin(2)
+            if config["Plot_diboson"] == "Enable":
+                h_diboson_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["diboson"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_diboson_background_a = dir1a.Get(
+                    "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_diboson_background_list.append(h_diboson_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["diboson"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_diboson_background_d = dir1d.Get(
+                    "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_diboson_background_d.Scale(dscale)
+                    h_diboson_background_list.append(h_diboson_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["diboson"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_diboson_background_e = dir1e.Get(
+                    "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_diboson_background_e.Scale(escale)
+                    h_diboson_background_list.append(h_diboson_background_e)           
+            
+                h_diboson_background = sum(h_diboson_background_list)
+                h_diboson_background.SetLineColor(kRed-3)
+                if ReBin == True:
+                    h_diboson_background.Rebin(2)
+                h_other_background_list.append(h_diboson_background)
 
-            file5a = TFile.Open("../PlotFiles/diboson_77p_MC16a.root", "READ")
-            file5d = TFile.Open("../PlotFiles/diboson_77p_MC16d.root", "READ")
-            file5e = TFile.Open("../PlotFiles/diboson_77p_MC16e.root", "READ")
-            dir5a = file5a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir5d = file5d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir5e = file5e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_diboson_background_a = dir5a.Get(
-                "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_diboson_background_d = dir5d.Get(
-                "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_diboson_background_e = dir5e.Get(
-                "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_diboson_background_d.Scale(dscale)
-            h_diboson_background_e.Scale(escale)
-            h_diboson_background = h_diboson_background_a + \
-                h_diboson_background_d+h_diboson_background_e
-            h_diboson_background.SetLineColor(kRed-3)
-            if ReBin == True:
-                h_diboson_background.Rebin(2)
+            if config["Plot_singleTop"] == "Enable":
+                h_singleTop_background_list = []
+                if config["Stack_MC16a"] == "Enable":
+                    file3a = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16a"]["singleTop"], "READ")
+                    dir1a = file3a.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_singleTop_background_a = dir1a.Get(
+                    "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_singleTop_background_list.append(h_singleTop_background_a)
+                if config["Stack_MC16d"] == "Enable":
+                    file3d = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16d"]["singleTop"], "READ")
+                    dir1d = file3d.GetDirectory("Nominal").GetDirectory(HistoName)
+                    h_singleTop_background_d = dir1d.Get(
+                    "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_singleTop_background_d.Scale(dscale)
+                    h_singleTop_background_list.append(h_singleTop_background_d)
+                if config["Stack_MC16e"] == "Enable":
+                    file3e = TFile.Open("../PlotFiles/" +
+                                        histoFiles["MC16e"]["singleTop"], "READ")
+                    dir1e = file3e.GetDirectory("Nominal").GetDirectory(HistoName)     
+                    h_singleTop_background_e = dir1e.Get(
+                    "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
+                    h_singleTop_background_e.Scale(escale)
+                    h_singleTop_background_list.append(h_singleTop_background_e)           
+            
+                h_singleTop_background = sum(h_singleTop_background_list)
+                h_singleTop_background.SetLineColor(kRed-3)
+                if ReBin == True:
+                    h_singleTop_background.Rebin(2)
+                h_other_background_list.append(h_singleTop_background)
 
-            file6a = TFile.Open(
-                "../PlotFiles/singleTop_77p_MC16a.root", "READ")
-            file6d = TFile.Open(
-                "../PlotFiles/singleTop_77p_MC16d.root", "READ")
-            file6e = TFile.Open(
-                "../PlotFiles/singleTop_77p_MC16e.root", "READ")
-            dir6a = file6a.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir6d = file6d.GetDirectory("Nominal").GetDirectory(HistoName)
-            dir6e = file6e.GetDirectory("Nominal").GetDirectory(HistoName)
-            h_singleTop_background_a = dir6a.Get(
-                "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_singleTop_background_d = dir6d.Get(
-                "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_singleTop_background_e = dir6e.Get(
-                "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-            h_singleTop_background_d.Scale(dscale)
-            h_singleTop_background_e.Scale(escale)
-            h_singleTop_background = h_singleTop_background_a + \
-                h_singleTop_background_d+h_singleTop_background_e
-            h_singleTop_background.SetLineColor(kRed-3)
-            if ReBin == True:
-                h_singleTop_background.Rebin(2)
-
-            h_other_background = h_singleTop_background + \
-                h_diboson_background + h_W_background
+            h_other_background = sum(h_other_background_list)
             h_all_background = h_ttbar_background + h_other_background
             h_sig_Hplus_m400.Scale(5)
             h_sig_Hplus_m800.Scale(5)
             h_sig_Hplus_m1600.Scale(5)
-            h_sig_Hplus_m400n = h_sig_Hplus_m400+h_all_background
-            h_sig_Hplus_m800n = h_sig_Hplus_m800+h_all_background
-            h_sig_Hplus_m1600n = h_sig_Hplus_m1600+h_all_background
+
+            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                h_sig_Hplus_m400n = h_sig_Hplus_m400+h_all_background
+            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                h_sig_Hplus_m800n = h_sig_Hplus_m800+h_all_background
+            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                h_sig_Hplus_m1600n = h_sig_Hplus_m1600+h_all_background
+                
             h_all_background.SetLineColor(1)
             h_all_background.SetFillColor(kGreen+3)
             h_other_background.SetLineColor(1)
             h_other_background.SetFillColor(kRed-3)
-            h_sig_Hplus_m400n.SetNdivisions(8)
-            h_sig_Hplus_m400n.SetXTitle(Xaxis_label)
-            ymax = h_sig_Hplus_m400n.GetMaximum()
-            h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
 
-            nbins = 20
-            # ymax=0
-            # ymax=h_sig_Hplus_m400n.GetMaximum()
-            # NormalizeHisto(h_other_background)
-            # if ymax<h_other_background.GetMaximum():
-            #     ymax=h_other_background.GetMaximum()
-            # NormalizeHisto(h_ttbar_background)
-            # if ymax<h_ttbar_background.GetMaximum():
-            #     ymax=h_ttbar_background.GetMaximum()
-            # NormalizeHisto(h_sig_Hplus_m400)
-            # if ymax<h_sig_Hplus_m400.GetMaximum():
-            #     ymax=h_sig_Hplus_m400.GetMaximum()
-            # NormalizeHisto(h_sig_Hplus_m800)
-            # if ymax<h_sig_Hplus_m800.GetMaximum():
-            #     ymax=h_sig_Hplus_m800.GetMaximum()
-            # NormalizeHisto(h_sig_Hplus_m1600)
-            # if ymax<h_sig_Hplus_m1600.GetMaximum():
-            #     ymax=h_sig_Hplus_m1600.GetMaximum()
-
-            h_sig_Hplus_m400n.Draw("HIST")
-            h_all_background.Draw("HISTSAME")
+            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                h_sig_Hplus_m400n.SetNdivisions(8)
+                h_sig_Hplus_m400n.SetXTitle(Xaxis_label)
+                ymax = h_sig_Hplus_m400n.GetMaximum()
+                h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
+                nbins = 20
+                h_sig_Hplus_m400n.Draw("HIST")
+            elif config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                h_sig_Hplus_m800n.SetNdivisions(8)
+                h_sig_Hplus_m800n.SetXTitle(Xaxis_label)
+                ymax = h_sig_Hplus_m800n.GetMaximum()
+                h_sig_Hplus_m800n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
+                nbins = 20
+                h_sig_Hplus_m800n.Draw("HIST")
+            elif config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                h_sig_Hplus_m1600n.SetNdivisions(8)
+                h_sig_Hplus_m1600n.SetXTitle(Xaxis_label)
+                ymax = h_sig_Hplus_m1600n.GetMaximum()
+                h_sig_Hplus_m1600n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
+                nbins = 
+                h_sig_Hplus_m1600n.Draw("HIST")
+    
+            h_all_background.Draw("HIST")
             h_other_background.Draw("HISTSAME")
-            h_sig_Hplus_m400n.Draw("HISTSAME")
-            h_sig_Hplus_m800n.Draw("HISTSAME")
-            h_sig_Hplus_m1600n.Draw("HISTSAME")
+
+            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                h_sig_Hplus_m400n.Draw("HISTSAME")
+            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                h_sig_Hplus_m800n.Draw("HISTSAME")
+            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                h_sig_Hplus_m1600n.Draw("HISTSAME")
 
             if HistoName in "maxMVAResponse":
                 leg = TLegend(0.2, 0.65, 0.725, 0.855)
@@ -352,10 +433,13 @@ for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_H
             leg.SetFillColor(kWhite)
             leg.SetLineColor(kWhite)
 
+            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
             leg.AddEntry(h_sig_Hplus_m400,
                          "H^{+}#rightarrow hW^{+} (m_{H^{+}}=400GeV) x5", "L")
+            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
             leg.AddEntry(h_sig_Hplus_m800,
                          "H^{+}#rightarrow hW^{+} (m_{H^{+}}=800GeV) x5", "L")
+            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
             leg.AddEntry(h_sig_Hplus_m1600,
                          "H^{+}#rightarrow hW^{+} (m_{H^{+}}=1600GeV) x5", "L")
             leg.AddEntry(h_all_background,    "t#bar{t}", "F")
@@ -367,5 +451,5 @@ for HistoName in ["MET", "METSig", "nJets", "Mwt", "HT", "HT_bjets", "DeltaPhi_H
             # c1.RedrawAxis()
             # c1.Update()
             # c1.RedrawAxis()
-            c1.SaveAs("../Plots/ShapePlot_%s_lvbb.pdf" %
+            c1.SaveAs(outputdir + "/ShapePlot_%s_lvbb.pdf" %
                       (HistoName+"_"+Region+"_"+btagStrategy))
