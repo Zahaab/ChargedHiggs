@@ -37,7 +37,7 @@ int main(int argc, char **argv)
   auto index = stdpath.find("MC16");
   if (index == std::string::npos)
   {
-    throw std::runtime_error(std::string("Error: MC16 in path"));
+    throw std::runtime_error(std::string("Error: not in path"));
   }
 
   for (auto stdMCDataPeriode : MCDataPeriodes)

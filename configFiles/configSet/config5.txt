@@ -1,10 +1,10 @@
 path = data/MC16a
-SampleName = diboson.root
+SampleName = sig_Hplus_Wh_m800-0.root
 WP = 77p
 OUTPUTDIR = /home/ap17080/projects/test
 batchMode = 0
 Higgs_mass_lower_bound = 90.
-Higgs_mass_upper_bound = 160.
+Higgs_mass_upper_bound = 140.
 Wboson_mass_lower_bound = 70.
 Wboson_mass_upper_bound = 100.
 Higgs_Wboson_angle = 2.5
