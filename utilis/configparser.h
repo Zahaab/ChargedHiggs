@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 
 std::unordered_map<std::string, std::string> parseConfig(std::string path)
 {
@@ -15,7 +16,7 @@ std::unordered_map<std::string, std::string> parseConfig(std::string path)
     std::int8_t del_index;
     std::unordered_map<std::string, std::string> configuration;
 
-    std::ifstream MyReadFile("test.txt");
+    std::ifstream MyReadFile(path);
     while (std::getline(MyReadFile, line))
     {
         line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());

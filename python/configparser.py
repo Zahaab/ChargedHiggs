@@ -2,7 +2,7 @@ def configParser(path):
     config = {}
     with open(path) as fp:
         for line in fp:
-            key_val = line.replace(" ", "").replace("\n", "").split("=")
+            key_val = line.replace(" ", "").strip().split("=")
             config[key_val[0]] = key_val[1]
     del config["-----------"]
     del config["------------"]
@@ -11,9 +11,10 @@ def configParser(path):
 
 # var is either Stack_ , Plot_ , Graph_ , Btag_ that give dataPeriodes, Plotting event catagories, Graph names, Btagging choice respectively.
 def getConfigData(config, var):
-    DataPeriodes = [key.replace(
+    # print(config)
+    ConfigData = [key.replace(
         var, "") for key in config if var in key and config[key] == "Enable"]
-    return DataPeriodes
+    return ConfigData
 
 
 def getPlotFiles(config, MCDataPeriode):

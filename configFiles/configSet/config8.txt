@@ -1,4 +1,4 @@
-path = data/MC16a
+path = data/MC16d
 SampleName = ttbarSherpa.root
 WP = 77p
 OUTPUTDIR = /home/ap17080/projects/test
@@ -15,7 +15,7 @@ Lepton_transverse_momentum = 30000.
 2Jets_Jet1_lepton_angle = 1.0
 2Jets_Jet2_lepton_angle = 1.0
 1Jet_Jet_transverse_momentum = 250000.
-Stack_MC16a = Enable
+Stack_MC16a = Disable
 Stack_MC16d = Enable
 Stack_MC16e = Enable
 GraphOnly = Disable

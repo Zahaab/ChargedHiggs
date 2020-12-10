@@ -11,19 +11,51 @@ from configparser import configParser, getConfigData, getPlotFiles, getXaxisLabe
 
 _, config_path = sys.argv
 
+
 config = configParser(config_path)
 MCDataPeriodes = getConfigData(config, "Stack_")
 histoNames = getConfigData(config, "Graph_")
 btagStrategies = getConfigData(config, "Btag_")
-for i in MCDataPeriodes:
-    histoFiles = getPlotFiles(config, i)
 
-    outputdir = "../Plots/" + config["WP"] + "/" + MCDataPeriode + "/" + config["Higgs_mass_lower_bound"] + "-" + config["Higgs_mass_upper_bound"] + "-" +
-    config["Wboson_mass_lower_bound"] + "-" + config["Wboson_mass_upper_bound"] + "-" + config["Missing_transverse_momentum"] + "-" +
-    config["Lepton_transverse_momentum"] + "-" + config["2Jets_Jet1_transverse_momentum"] + "-" +
-    config["2Jets_Jet2_transverse_momentum"] + "-" + config["2Jets_Jet1_lepton_angle"] + "-" + config["2Jets_Jet2_lepton_angle"] + "-" +
-    config["Higgs_Wboson_angle"] + "-" + \
-        config["1Jet_Jet_transverse_momentum"]
+
+def NormalizeHisto(histo):
+    n_events = histo.Integral(-1, histo.GetNbinsX()+1)
+    if n_events == 0:
+        return
+    #print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
+    histo.Scale(1./n_events)
+    histo.SetLineWidth(2)
+    histo.SetStats(0)
+    histo.SetFillStyle(3001)
+    histo.SetMarkerColor(histo.GetLineColor())
+    histo.SetMarkerSize(0.0)
+    histo.GetXaxis().SetTitleOffset(1.2)
+    histo.GetYaxis().SetTitleOffset(1.52)
+    histo.GetXaxis().SetLabelSize(0.05)
+    histo.GetYaxis().SetLabelSize(0.05)
+    histo.GetXaxis().SetTitleSize(0.05)
+    histo.GetYaxis().SetTitleSize(0.05)
+    histo.GetYaxis().SetNdivisions(504)
+    histo.GetXaxis().SetNdivisions(504)
+
+
+for MCDataPeriode in MCDataPeriodes:
+    histoFiles = getPlotFiles(config, MCDataPeriode)
+
+    outputdir = str("../Plots/" +
+                    config["WP"] + "/" + MCDataPeriode +
+                    "/" + config["Higgs_mass_lower_bound"]
+                    + "-" + config["Higgs_mass_upper_bound"] + "-" +
+                    config["Wboson_mass_lower_bound"] + "-" +
+                    config["Wboson_mass_upper_bound"]
+                    + "-" + config["Missing_transverse_momentum"] + "-" +
+                    config["Lepton_transverse_momentum"] + "-" +
+                    config["2Jets_Jet1_transverse_momentum"]
+                    + "-" + config["2Jets_Jet2_transverse_momentum"] + "-" +
+                    config["2Jets_Jet1_lepton_angle"] + "-" +
+                    config["2Jets_Jet2_lepton_angle"]
+                    + "-" + config["Higgs_Wboson_angle"] + "-" +
+                    config["1Jet_Jet_transverse_momentum"])
 
     try:
         os.mkdir(outputdir)
@@ -31,7 +63,6 @@ for i in MCDataPeriodes:
         print "Creation of the directory %s failed" % outputdir
     else:
         print "Successfully created the directory %s " % outputdir
-
     gROOT.SetBatch(True)
     gStyle.SetOptStat(0)
     gStyle.SetPalette(1)
@@ -45,36 +76,21 @@ for i in MCDataPeriodes:
     c_red = TColor.GetColor("#ee3311")
     c_orange = TColor.GetColor("#ff9900")
 
-    def NormalizeHisto(histo):
-        n_events = histo.Integral(-1, histo.GetNbinsX()+1)
-        if n_events == 0:
-            return
-        print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
-        histo.Scale(1./n_events)
-        histo.SetLineWidth(2)
-        histo.SetStats(0)
-        histo.SetFillStyle(3001)
-        histo.SetMarkerColor(histo.GetLineColor())
-        histo.SetMarkerSize(0.0)
-        histo.GetXaxis().SetTitleOffset(1.2)
-        histo.GetYaxis().SetTitleOffset(1.52)
-        histo.GetXaxis().SetLabelSize(0.05)
-        histo.GetYaxis().SetLabelSize(0.05)
-        histo.GetXaxis().SetTitleSize(0.05)
-        histo.GetYaxis().SetTitleSize(0.05)
-        histo.GetYaxis().SetNdivisions(504)
-        histo.GetXaxis().SetNdivisions(504)
-
     c1 = TCanvas("ShapePlots", "", 720, 720)
-
     # for HistoName in ["Mwt"]:
     for HistoName in histoNames:
+        histoDir = outputdir + "/" + HistoName
+        try:
+            os.mkdir(histoDir)
+        except OSError:
+            pass
+
         for Region in ["Merged_LepN_SR"]:
             # What is Incl in terms of BTagStrategy?
             for btagStrategy in btagStrategies:
                 # for btagStrategy in ["TwoTags"]:
-                # print(HistoName)
-                if config[Graph_Rebin] = "Enable":
+                ReBin = False
+                if config["Graph_Rebin"] == "Enable":
                     ReBin = True
                 else:
                     ReBin = False
@@ -95,11 +111,11 @@ for i in MCDataPeriodes:
                         h_sig_Hplus_m400.Rebin(2)
 
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                    file6 = TFile.Open("../PlotFiles/" +
+                    file2 = TFile.Open("../PlotFiles/" +
                                        histoFiles["sig_Hplus_Wh_m800-0"], "READ")
-                    dir6 = file6.GetDirectory(
+                    dir2 = file2.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_sig_Hplus_m800 = dir6.Get(
+                    h_sig_Hplus_m800 = dir2.Get(
                         "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_sig_Hplus_m800.SetLineColor(kBlue)
                     h_sig_Hplus_m800.SetLineStyle(3)
@@ -107,11 +123,11 @@ for i in MCDataPeriodes:
                         h_sig_Hplus_m800.Rebin(2)
 
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                    file7 = TFile.Open("../PlotFiles/" +
+                    file3 = TFile.Open("../PlotFiles/" +
                                        histoFiles["sig_Hplus_Wh_m1600-0"], "READ")
-                    dir7 = file7.GetDirectory(
+                    dir3 = file3.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_sig_Hplus_m1600 = dir7.Get(
+                    h_sig_Hplus_m1600 = dir3.Get(
                         "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_sig_Hplus_m1600.SetLineColor(kViolet)
                     h_sig_Hplus_m1600.SetLineStyle(9)
@@ -119,33 +135,33 @@ for i in MCDataPeriodes:
                         h_sig_Hplus_m1600.Rebin(2)
 
                 if config["Plot_ttbar"] == "Enable":
-                    file2 = TFile.Open("../PlotFiles/" +
+                    file4 = TFile.Open("../PlotFiles/" +
                                        histoFiles["ttbar"], "READ")
-                    dir2 = file2.GetDirectory(
+                    dir4 = file4.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_ttbar_background = dir2.Get(
+                    h_ttbar_background = dir4.Get(
                         "ttbar_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-                    h_ttbar_background.SetLineColor(219)
+                    h_ttbar_background.SetLineColor(kGreen+3)
                     if ReBin == True:
                         h_ttbar_background.Rebin(2)
 
                 elif config["Plot_ttbarSherpa"] == "Enable":
-                    file2 = TFile.Open("../PlotFiles/" +
+                    file5 = TFile.Open("../PlotFiles/" +
                                        histoFiles["ttbarSherpa"], "READ")
-                    dir2 = file2.GetDirectory(
+                    dir5 = file5.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_ttbarSherpa_background = dir2.Get(
+                    h_ttbarSherpa_background = dir5.Get(
                         "ttbarSherpa_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
-                    h_ttbarSherpa_background.SetLineColor(219)
+                    h_ttbarSherpa_background.SetLineColor(kGreen+3)
                     if ReBin == True:
                         h_ttbarSherpa_background.Rebin(2)
 
                 if config["Plot_Wjets"] == "Enable":
-                    file3 = TFile.Open("../PlotFiles/" +
+                    file6 = TFile.Open("../PlotFiles/" +
                                        histoFiles["Wjets"], "READ")
-                    dir3 = file3.GetDirectory(
+                    dir6 = file6.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_W_background = dir3.Get(
+                    h_W_background = dir6.Get(
                         "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_W_background.SetLineColor(kRed)
                     if ReBin == True:
@@ -153,42 +169,49 @@ for i in MCDataPeriodes:
                     h_other_backgroundlist.append(h_W_background)
 
                 if config["Plot_Zjets"] == "Enable":
-                    file3 = TFile.Open("../PlotFiles/" +
+                    file7 = TFile.Open("../PlotFiles/" +
                                        histoFiles["Zjets"], "READ")
-                    dir3 = file3.GetDirectory(
+                    dir7 = file7.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_Z_background = dir3.Get(
+                    h_Z_background = dir7.Get(
                         "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_Z_background.SetLineColor(kRed)
                     if ReBin == True:
                         h_Z_background.Rebin(2)
                     h_other_backgroundlist.append(h_Z_background)
 
-                if config["diboson"] == "Enable":
-                    file4 = TFile.Open("../PlotFiles/" +
+                if config["Plot_diboson"] == "Enable":
+                    file8 = TFile.Open("../PlotFiles/" +
                                        histoFiles["diboson"], "READ")
-                    dir4 = file4.GetDirectory(
+                    dir8 = file8.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_diboson_background = dir4.Get(
+                    h_diboson_background = dir8.Get(
                         "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_diboson_background.SetLineColor(kRed)
                     if ReBin == True:
                         h_diboson_background.Rebin(2)
                     h_other_backgroundlist.append(h_diboson_background)
 
-                if config["singleTop"] == "Enable":
-                    file5 = TFile.Open("../PlotFiles/" +
+                if config["Plot_singleTop"] == "Enable":
+                    file9 = TFile.Open("../PlotFiles/" +
                                        histoFiles["singleTop"], "READ")
-                    dir5 = file5.GetDirectory(
+                    dir9 = file9.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
-                    h_singleTop_background = dir5.Get(
+                    h_singleTop_background = dir9.Get(
                         "singleTop_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_singleTop_background.SetLineColor(kRed)
                     if ReBin == True:
                         h_singleTop_background.Rebin(2)
                     h_other_backgroundlist.append(h_singleTop_background)
 
-                h_other_background = sum(h_other_backgroundlist)
+                h_other_background = 0
+
+                if len(h_other_backgroundlist) > 0:
+                    for i in h_other_backgroundlist:
+                        if h_other_background == 0:
+                            h_other_background = i
+                        else:
+                            h_other_background += i
 
                 nbins = 20
                 ymax = 0
@@ -258,5 +281,5 @@ for i in MCDataPeriodes:
                 c1.RedrawAxis()
                 c1.Update()
                 c1.RedrawAxis()
-                c1.SaveAs(outputdir + "/ShapePlot_%s_lvbb.pdf" %
+                c1.SaveAs(histoDir + "/ShapePlot_%s_lvbb.pdf" %
                           (HistoName + "_" + btagStrategy))
