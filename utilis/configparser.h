@@ -15,7 +15,7 @@ std::unordered_map<std::string, std::string> parseConfig(std::string path)
     std::int8_t del_index;
     std::unordered_map<std::string, std::string> configuration;
 
-    std::ifstream MyReadFile(path);
+    std::ifstream MyReadFile("test.txt");
     while (std::getline(MyReadFile, line))
     {
         line.erase(std::remove_if(line.begin(), line.end(), ::isspace), line.end());
@@ -25,6 +25,8 @@ std::unordered_map<std::string, std::string> parseConfig(std::string path)
         value = line;
         configuration[key] = value;
     }
+    configuration.erase("-----------");
+    configuration.erase("------------");
     return configuration;
 }
 
@@ -36,11 +38,11 @@ std::vector<std::string> parseDataPeriodes(std::unordered_map<std::string, std::
     if (path.find("MC16a") != std::string::npos)
     {
         MCDataPeriodes.push_back("MC16a");
-        if (config["StackM16d"] == "Enable")
+        if (config["Stack_MC16d"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16d");
         }
-        if (config["StackM16e"] == "Enable")
+        if (config["Stack_MC16e"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16e");
         }
@@ -48,11 +50,11 @@ std::vector<std::string> parseDataPeriodes(std::unordered_map<std::string, std::
     if (path.find("MC16d") != std::string::npos)
     {
         MCDataPeriodes.push_back("MC16d");
-        if (config["StackM16a"] == "Enable")
+        if (config["Stack_MC16a"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16a");
         }
-        if (config["StackM16e"] == "Enable")
+        if (config["Stack_MC16e"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16e");
         }
@@ -60,11 +62,11 @@ std::vector<std::string> parseDataPeriodes(std::unordered_map<std::string, std::
     if (path.find("MC16e") != std::string::npos)
     {
         MCDataPeriodes.push_back("MC16e");
-        if (config["StackM16d"] == "Enable")
+        if (config["Stack_MC16d"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16d");
         }
-        if (config["StackM16a"] == "Enable")
+        if (config["Stack_MC16a"] == "Enable")
         {
             MCDataPeriodes.push_back("MC16a");
         }
