@@ -22,8 +22,14 @@ void EventLoop::Loop()
             break;
         nb = fChain->GetEntry(jentry);
         nbytes += nb;
-        if (jentry % 100000 == 0)
-            std::cout << "Processing " << jentry << " events!!!" << std::endl;
+
+        if (EventReadout != 0)
+        {
+            if (jentry % EventReadout == 0)
+            {
+                std::cout << "Processing " << jentry << " events!!!" << std::endl;
+            }
+        }
         for (auto sel : mySel)
         {
             pass_sel[sel] = false;

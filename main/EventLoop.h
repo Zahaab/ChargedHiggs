@@ -113,7 +113,7 @@ public:
    TBranch *b_TrackJet_M;            //!
    TBranch *b_TrackJet_btagWeight;   //!
 
-   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
+   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", int EventReadout = 0, Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
              Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
              Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
 
@@ -264,6 +264,7 @@ public:
    Float_t lep_jet1_angle = 1.0;
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
+   int EventReadout = 0;
 };
 
 #endif
@@ -326,6 +327,10 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
    {
       solo_jet_ptv = std::stof(config["1Jet_Jet_transverse_momentum"]);
    }
+   if (config["EventReadout"] != "")
+   {
+      EventReadout = std::stoi(config["EventReadout"]);
+   }
    if (config["SampleName"] == "")
    {
       throw std::runtime_error(std::string("Error: No SampleName given"));
@@ -371,7 +376,7 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
    Init(tree, SampleName, ExpUncertaintyName);
 }
 
-EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
+EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, int EventReadout, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
                      Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                      Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
                                                                hmlb(hmlb),

@@ -7,7 +7,7 @@ import re
 import os
 from ROOT import *
 from array import *
-from configparser import configParser, getConfigData, getPlotFiles, getXaxisLabel
+from configparser import configParser, getConfigData, getPlotFiles, getaxisLabels
 
 _, config_path = sys.argv
 
@@ -22,7 +22,7 @@ def NormalizeHisto(histo):
     n_events = histo.Integral(-1, histo.GetNbinsX()+1)
     if n_events == 0:
         return
-    #print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
+    # print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
     histo.Scale(1./n_events)
     histo.SetLineWidth(2)
     histo.SetStats(0)
@@ -84,18 +84,20 @@ for MCDataPeriode in MCDataPeriodes:
             os.mkdir(histoDir)
         except OSError:
             pass
+        Xaxis_label, legend_place, text_place = getaxisLabels(HistoName)
+        leg_pl1, leg_pl2, leg_pl3, leg_pl4 = legend_place
+        test_pl1, test_pl2 = text_place
 
         for Region in ["Merged_LepN_SR"]:
             # What is Incl in terms of BTagStrategy?
             for btagStrategy in btagStrategies:
                 # for btagStrategy in ["TwoTags"]:
                 ReBin = False
-                if config["Graph_Rebin"] == "Enable":
+                if config["Rebin"] == "Enable":
                     ReBin = True
                 else:
                     ReBin = False
                 YAxisScale = 1.4
-                Xaxis_label = getXaxisLabel(HistoName)
                 h_other_backgroundlist = []
 
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
@@ -241,20 +243,20 @@ for MCDataPeriode in MCDataPeriodes:
                     if ymax < h_sig_Hplus_m1600.GetMaximum():
                         ymax = h_sig_Hplus_m1600.GetMaximum()
 
+                h_other_background.GetXaxis().SetTitle(Xaxis_label)
+                h_other_background.GetYaxis().SetRangeUser(0.001, round(ymax*1.25, 3)+0.001)
                 h_other_background.Draw("HIST")
                 h_ttbar_background.Draw("HISTSAME")
                 h_sig_Hplus_m400.Draw("HISTSAME")
                 h_sig_Hplus_m800.Draw("HISTSAME")
                 h_sig_Hplus_m1600.Draw("HISTSAME")
 
-                if HistoName in "maxMVAResponse":
-                    leg = TLegend(0.2, 0.65, 0.725, 0.855)
-                else:
-                    leg = TLegend(0.45, 0.65, 0.925, 0.855)
-                ATLAS_LABEL(0.20, 0.885, " Simulation Internal", 1, 0.19)
+                leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)
+                atlas_lable = ATLAS_LABEL(0.19, 0.95)
+                myText(test_pl1, test_pl2, 1, HistoName+" "+btagStrategy)
                 leg.SetShadowColor(kWhite)
                 leg.SetFillColor(kWhite)
-                leg.SetLineColor(kWhite)
+                leg.SetLineColor(kBlack)
 
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     leg.AddEntry(h_sig_Hplus_m400,
@@ -275,9 +277,6 @@ for MCDataPeriode in MCDataPeriodes:
                 leg.AddEntry(h_other_background,  "other backgrounds", "L")
                 leg.SetTextSize(0.0325)
                 leg.Draw()
-                h_other_background.GetXaxis().SetTitle(Xaxis_label)
-                h_other_background.GetYaxis().SetRangeUser(0.001, round(ymax*1.25, 3)+0.001)
-
                 c1.RedrawAxis()
                 c1.Update()
                 c1.RedrawAxis()

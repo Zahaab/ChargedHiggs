@@ -7,7 +7,7 @@ import math
 import re
 from ROOT import *
 from array import *
-from configparser import configParser, getConfigData, getPlotFiles, getXaxisLabel
+from configparser import configParser, getConfigData, getPlotFiles, getaxisLabels
 
 _, config_path = sys.argv
 
@@ -56,25 +56,25 @@ def sumHistosList(histo_list):
     return resultHisto
 
 
-def NormalizeHisto(histo):
-    n_events = histo.Integral(-1, histo.GetNbinsX()+1)
-    if n_events == 0:
-        return
-    print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
-    histo.Scale(1./n_events)
-    histo.SetLineWidth(2)
-    histo.SetStats(0)
-    histo.SetFillStyle(3001)
-    histo.SetMarkerColor(histo.GetLineColor())
-    histo.SetMarkerSize(0.0)
-    histo.GetXaxis().SetTitleOffset(1.2)
-    histo.GetYaxis().SetTitleOffset(1.52)
-    histo.GetXaxis().SetLabelSize(0.05)
-    histo.GetYaxis().SetLabelSize(0.05)
-    histo.GetXaxis().SetTitleSize(0.05)
-    histo.GetYaxis().SetTitleSize(0.05)
-    histo.GetYaxis().SetNdivisions(504)
-    histo.GetXaxis().SetNdivisions(504)
+# def NormalizeHisto(histo):
+#     n_events = histo.Integral(-1, histo.GetNbinsX()+1)
+#     if n_events == 0:
+#         return
+#     print n_events, histo.Integral(histo.GetNbinsX(), histo.GetNbinsX()+1)
+#     histo.Scale(1./n_events)
+#     histo.SetLineWidth(2)
+#     histo.SetStats(0)
+#     histo.SetFillStyle(3001)
+#     histo.SetMarkerColor(histo.GetLineColor())
+#     histo.SetMarkerSize(0.0)
+#     histo.GetXaxis().SetTitleOffset(1.2)
+#     histo.GetYaxis().SetTitleOffset(1.52)
+#     histo.GetXaxis().SetLabelSize(0.05)
+#     histo.GetYaxis().SetLabelSize(0.05)
+#     histo.GetXaxis().SetTitleSize(0.05)
+#     histo.GetYaxis().SetTitleSize(0.05)
+#     histo.GetYaxis().SetNdivisions(504)
+#     histo.GetXaxis().SetNdivisions(504)
 
 
 c1 = TCanvas("ShapePlots", "", 720, 720)
@@ -88,23 +88,23 @@ for HistoName in histoNames:
         os.mkdir(histoDir)
     except OSError:
         pass
+    Xaxis_label, legend_place, text_place = getaxisLabels(HistoName)
+    leg_pl1, leg_pl2, leg_pl3, leg_pl4 = legend_place
+    test_pl1, test_pl2 = text_place
 
     for Region in ["Merged_LepN_SR"]:
         for btagStrategy in btagStrategies:
             ReBin = False
-            if config["Graph_Rebin"] == "Enable":
+            if config["Rebin"] == "Enable":
                 ReBin = True
             else:
                 ReBin = False
             YAxisScale = 1.4
-            Xaxis_label = getXaxisLabel(HistoName)
-
             # correct problem in maker: wrong normalisation
             dscale = 1.223695
             escale = 1.61419497
             h_other_background_list = []
             h_ttbar_background = []
-
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 h_sig_Hplus_m400list = []
                 if config["Stack_MC16a"] == "Enable":
@@ -139,7 +139,6 @@ for HistoName in histoNames:
                 h_sig_Hplus_m400.SetLineStyle(7)
                 if ReBin == True:
                     h_sig_Hplus_m400.Rebin(2)
-
             if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                 h_sig_Hplus_m800list = []
                 if config["Stack_MC16a"] == "Enable":
@@ -174,7 +173,6 @@ for HistoName in histoNames:
                 h_sig_Hplus_m800.SetLineStyle(7)
                 if ReBin == True:
                     h_sig_Hplus_m800.Rebin(2)
-
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 h_sig_Hplus_m1600list = []
                 if config["Stack_MC16a"] == "Enable":
@@ -471,6 +469,10 @@ for HistoName in histoNames:
                 if ymax < h_sig_Hplus_m1600.GetMaximum():
                     ymax = h_sig_Hplus_m1600.GetMaximum()
 
+            h_all_background.SetNdivisions(8)
+            h_all_background.SetXTitle(Xaxis_label)
+            h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
+
             h_all_background.Draw("HIST")
             h_other_background.Draw("HISTSAME")
 
@@ -481,15 +483,14 @@ for HistoName in histoNames:
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 h_sig_Hplus_m1600n.Draw("HISTSAME")
 
-            if HistoName in "maxMVAResponse":
-                leg = TLegend(0.2, 0.65, 0.725, 0.855)
-            else:
-                leg = TLegend(0.42, 0.6, 0.92, 0.805)
-            ATLAS_LABEL(0.20, 0.885, " Simulation Internal", 1, 0.19)
-            myText(0.20, 0.825, 1, HistoName+" "+btagStrategy)
+            leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)
+            atlas_lable = ATLAS_LABEL(0.19, 0.95)
+            myText(test_pl1, test_pl2, 1, HistoName+" "+btagStrategy)
             leg.SetShadowColor(kWhite)
+            leg.SetMargin(0.15)
+            leg.SetTextSize(0.017)
             leg.SetFillColor(kWhite)
-            leg.SetLineColor(kWhite)
+            leg.SetLineColor(kBlack)
 
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 leg.AddEntry(h_sig_Hplus_m400,
@@ -502,16 +503,7 @@ for HistoName in histoNames:
                              "H^{+}#rightarrow hW^{+} (m_{H^{+}}=1600GeV) x5", "L")
             leg.AddEntry(h_all_background,    "t#bar{t}", "F")
             leg.AddEntry(h_other_background,  "other backgrounds", "F")
-            leg.SetTextSize(0.0200)
             leg.Draw()
-            h_all_background.SetNdivisions(8)
-            h_all_background.SetXTitle(Xaxis_label)
-            h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-            # h_sig_Hplus_m400n.GetXaxis().SetTitle(Xaxis_label)
-            # h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001,ymax*1.3)
-            # c1.RedrawAxis()
-            # c1.Update()
-            # c1.RedrawAxis()
             c1.RedrawAxis()
             c1.Update()
             c1.RedrawAxis()

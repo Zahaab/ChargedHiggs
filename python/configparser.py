@@ -30,49 +30,96 @@ def getPlotFiles(config, MCDataPeriode):
 
 
 # This function is put here to make the plotting fiels cleaner
-def getXaxisLabel(HistoName):
-    if "MET" in HistoName:
+def getaxisLabels(HistoName):
+    Xaxis_label = ""
+    legend_place = []
+    text_place = []
+    if "MET" == HistoName:
         Xaxis_label = "Missing Transverse Momentum [GeV]"
-    elif "METSig" in HistoName:
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.65, 0.895]
+    elif "METSig" == HistoName:
         Xaxis_label = "E_{T}^{mis.} significance"
-    elif "MinDeltaPhiJETMET" in HistoName:
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.6, 0.895]
+    elif "MinDeltaPhiJETMET" == HistoName:
         Xaxis_label = "Jet Multiplicity"
-    elif "Mwt" in HistoName:
-        Xaxis_label = "Transverse W-boson Mass [GeV]"
-    elif "Lepton_Eta" in HistoName:
-        Xaxis_label = "Lepton Scalar Transverse Momentum Sum [GeV]"
-    elif "Lepton_Pt" in HistoName:
-        Xaxis_label = "Lepton Scalar Transverse Momentum Sum [GeV]"
-    elif "nJets" in HistoName:
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.4, 0.895]
+    elif "Mwt" == HistoName:
+        Xaxis_label = "m_{T}(W) [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.65, 0.895]
+    elif "Lepton_Eta" == HistoName:
+        Xaxis_label = "Lepton #eta [Rad]"
+        legend_place = [0.69, 0.795, 0.95, 0.95]
+        text_place = [0.19, 0.895]
+    elif "Lepton_Pt" == HistoName:
+        Xaxis_label = "Lepton p_{T} [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.56, 0.895]
+    elif "nJets" == HistoName:
         Xaxis_label = "b-Tag Multiplicity"
-    elif "nBTags" in HistoName:
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
+    elif "nBTags" == HistoName:
         Xaxis_label = "Number of b-tags"
-    elif "HT" in HistoName:
-        Xaxis_label = "Transverse Jet Mass [GeV]"
-    elif "HT_bjets" in HistoName:
-        Xaxis_label = "Transverse Jet Mass [GeV]"
-    elif "mVH" in HistoName:
-        Xaxis_label = "Wplus + Higgs Mass [GeV]"
-    elif "DeltaPhi_HW" in HistoName:
-        Xaxis_label = "DeltaPhi of Higgs and W-boson"
-    elif "pTH" in HistoName:
-        Xaxis_label = "Higgs Scalar Transverse Momentum Sum [GeV]"
-    elif "pTH_over_mVH" in HistoName:
-        Xaxis_label = "Higgs Transverse Momentum over Wplus + Higgs Mass [GeV]"
-    elif "pTWplus" in HistoName:
-        Xaxis_label = "Transverse Wplus-boson Mass [GeV]"
-    elif "pTW_over_mVH" in HistoName:
-        Xaxis_label = "Wplus-boson Transverse Momentum over Wplus + Higgs Mass [GeV]"
-    elif "pTWminus" in HistoName:
-        Xaxis_label = "Transverse Wminus-boson Mass [GeV]"
-    elif "mH" in HistoName:
+        legend_place = [0.69, 0.795, 0.95, 0.95]
+        text_place = [0.19, 0.895]
+    elif "HT" == HistoName:
+        Xaxis_label = "H_{T}(jet) [GeV]"
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
+    elif "HT_bjets" == HistoName:
+        Xaxis_label = "H_{T}(Bjet) [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.6, 0.895]
+    elif "mVH" == HistoName:
+        Xaxis_label = "m_{VH} [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.65, 0.895]
+    elif "DeltaPhi_HW" == HistoName:
+        Xaxis_label = "#Delta#phi of Higgs and W-boson"
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
+    elif "pTH" == HistoName:
+        Xaxis_label = "p_{T}(h) [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.65, 0.895]
+    elif "pTH_over_mVH" == HistoName:
+        Xaxis_label = "p_{T}(h) / m_{VH} [GeV]"
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
+    elif "pTWplus" == HistoName:
+        Xaxis_label = "p_{T}(W^{+}) [GeV]"
+        legend_place = [0.69, 0.795, 0.95, 0.95]
+        text_place = [0.19, 0.895]
+    elif "pTW_over_mVH" == HistoName:
+        Xaxis_label = "p_{T}(W) / m_{VH} [GeV]"
+        legend_place = [0.69, 0.795, 0.95, 0.95]
+        text_place = [0.19, 0.895]
+    elif "pTWminus" == HistoName:
+        Xaxis_label = "p_{T}(W^{-}) [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.56, 0.895]
+    elif "mH" == HistoName:
         Xaxis_label = "Higgs Mass [GeV]"
-    elif "mWplus" in HistoName:
-        Xaxis_label = "Wplus Mass [GeV]"
-    elif "maxMVAResponse" in HistoName:
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.65, 0.895]
+    elif "mWplus" == HistoName:
+        Xaxis_label = "W^{+} Mass [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.6, 0.895]
+    elif "maxMVAResponse" == HistoName:
         Xaxis_label = "maxMVAResponse"
-    elif "mass_resolution" in HistoName:
-        Xaxis_label = "mass_resolution"
-    elif "MET_over_rootHT" in HistoName:
-        Xaxis_label = "Missing Transverse Momentum over Transverse Jet Mass [GeV]"
-    return Xaxis_label
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
+    elif "mass_resolution" == HistoName:
+        Xaxis_label = "mass_resolution".replace("_", " ")
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.47, 0.895]
+    elif "MET_over_rootHT" == HistoName:
+        Xaxis_label = "Missing p_{T} / H_{T}(jet) [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.445, 0.895]
+    return [Xaxis_label, legend_place, text_place]
