@@ -1,5 +1,5 @@
-path = data/MC16a
-SampleName = sig_Hplus_Wh_m800-0.root
+path = data/MC16e
+SampleName = Wjets.root
 WP = 77p
 OUTPUTDIR = /home/ap17080/Thesis/ChargedHiggs
 batchMode = 0
@@ -16,7 +16,7 @@ Lepton_transverse_momentum = 30000.
 2Jets_Jet2_lepton_angle = 1.0
 1Jet_Jet_transverse_momentum = 250000.
 Stack_MC16a = Disable
-Stack_MC16d = Enable
+Stack_MC16d = Disable
 Stack_MC16e = Enable
 GraphOnly = Disable
 Rebin = Enable

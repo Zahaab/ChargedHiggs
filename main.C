@@ -68,6 +68,8 @@ int main(int argc, char **argv)
       // This prints GetEntries from the Tchain to the terminal
       std::cout << mych_data->GetEntries() << "  " << path + "/" + SampleName << std::endl;
       EventLoop *eventLoop = new EventLoop(mych_data, TreeName, config);
+      std::cout << "working"
+                << "\n";
       eventLoop->Loop();
       std::string my_dir = TreeNames.at(i);
       TDirectory *subdir = outfile->mkdir(my_dir.c_str());

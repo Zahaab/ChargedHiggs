@@ -484,6 +484,7 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    h_MinDeltaPhiJETMET = new TH1Fs(sampleName + "_MinDeltaPhiJETMET", "", 32, 0, 3.2, mySel, m_UncNames, ExpUncertaintyName);
    h_HT = new TH1Fs(sampleName + "_HT", "", 30, 0, 1500, mySel, m_UncNames, ExpUncertaintyName);
    h_HT_bjets = new TH1Fs(sampleName + "_HT_bjets", "", 30, 0, 1200, mySel, m_UncNames, ExpUncertaintyName);
+   h_HT_bjets_Lepton_Pt = new TH1Fs(sampleName + "_HT_bjets_Lepton_Pt", "", 30, 0, 1200, mySel, m_UncNames, ExpUncertaintyName);
    h_mVH = new TH1Fs(sampleName + "_mVH", "", 30, 0, 2400, mySel, m_UncNames, ExpUncertaintyName);
    h_DeltaPhi_HW = new TH1Fs(sampleName + "_DeltaPhi_HW", "", 32, 0, 3.2, mySel, m_UncNames, ExpUncertaintyName);
    h_maxMVAResponse = new TH1Fs(sampleName + "_maxMVAResponse", "", 20, -1, 1, mySel, m_UncNames, ExpUncertaintyName);

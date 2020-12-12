@@ -1,4 +1,4 @@
-path = data/MC16a
+path = data/MC16d
 SampleName = diboson.root
 WP = 77p
 OUTPUTDIR = /home/ap17080/Thesis/ChargedHiggs
@@ -17,7 +17,7 @@ Lepton_transverse_momentum = 30000.
 1Jet_Jet_transverse_momentum = 250000.
 Stack_MC16a = Disable
 Stack_MC16d = Enable
-Stack_MC16e = Enable
+Stack_MC16e = Disable
 GraphOnly = Disable
 Rebin = Enable
 EventReadout = 0
