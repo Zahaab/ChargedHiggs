@@ -20,13 +20,6 @@ int main(int argc, char **argv)
   clock_t begin = clock();
   TApplication theApp("evsel", &argc, argv);
   auto config = parseConfig(theApp.Argv(1));
-
-  for (auto element : config)
-  {
-    std::cout << element.first << "   |   " << element.second << "Alive"
-              << "\n";
-  }
-
   TString path;
   TString MCDataPeriode;
   TString SampleName = config["SampleName"];
@@ -62,6 +55,7 @@ int main(int argc, char **argv)
     {
       OutFileName = OUTPUTDIR + "/PlotFiles/" + OutFileName;
     }
+
     TFile *outfile = TFile::Open(OutFileName, "RECREATE");
     for (unsigned int i = 0; i < TreeNames.size(); i++)
     {

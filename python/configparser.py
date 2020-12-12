@@ -74,6 +74,10 @@ def getaxisLabels(HistoName):
         Xaxis_label = "H_{T}(Bjet) [GeV]"
         legend_place = [0.65, 0.73, 0.91, 0.885]
         text_place = [0.6, 0.895]
+    elif "HT_bjets_Lepton_Pt" == HistoName:
+        Xaxis_label = "H_{T}(Bjet) + Lepton p_{T} [GeV]"
+        legend_place = [0.65, 0.73, 0.91, 0.885]
+        text_place = [0.38, 0.895]
     elif "mVH" == HistoName:
         Xaxis_label = "m_{VH} [GeV]"
         legend_place = [0.65, 0.73, 0.91, 0.885]

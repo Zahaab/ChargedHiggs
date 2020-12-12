@@ -166,6 +166,7 @@ public:
    TH1Fs *h_MinDeltaPhiJETMET;
    TH1Fs *h_HT;
    TH1Fs *h_HT_bjets;
+   TH1Fs *h_HT_bjets_Lepton_Pt;
    TH1Fs *h_mVH;
    TH1Fs *h_DeltaPhi_HW;
    TH1Fs *h_maxMVAResponse;

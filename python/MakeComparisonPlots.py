@@ -244,7 +244,7 @@ for MCDataPeriode in MCDataPeriodes:
                         ymax = h_sig_Hplus_m1600.GetMaximum()
 
                 h_other_background.GetXaxis().SetTitle(Xaxis_label)
-                h_other_background.GetYaxis().SetRangeUser(0.001, round(ymax*1.25, 3)+0.001)
+                h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_other_background.Draw("HIST")
                 h_ttbar_background.Draw("HISTSAME")
                 h_sig_Hplus_m400.Draw("HISTSAME")

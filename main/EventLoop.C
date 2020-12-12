@@ -120,6 +120,7 @@ void EventLoop::Loop()
             h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
             h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
             h_HT_bjets->Fill(m_HT_bjets, m_EventWeights, pass_sel, m_NTags);
+            h_HT_bjets_Lepton_Pt->Fill(m_HT_bjets + Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_pTWminus->Fill(Wminus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_mVH->Fill(m_mVH, m_EventWeights, pass_sel, m_NTags);
             h_DeltaPhi_HW->Fill(m_DeltaPhi_HW, m_EventWeights, pass_sel, m_NTags);
@@ -695,6 +696,7 @@ void EventLoop::Write(TDirectory *dir, std::string dirname)
     h_NBtags->Write(dir, ("nBTags"));
     h_HT->Write(dir, ("HT"));
     h_HT_bjets->Write(dir, ("HT_bjets"));
+    h_HT_bjets_Lepton_Pt->Write(dir, ("HT_bjets_Lepton_Pt"));
     h_mVH->Write(dir, ("mVH"));
     h_DeltaPhi_HW->Write(dir, ("DeltaPhi_HW"));
     h_pTH->Write(dir, ("pTH"));
