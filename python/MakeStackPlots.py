@@ -471,7 +471,7 @@ for HistoName in histoNames:
 
             h_all_background.SetNdivisions(8)
             h_all_background.SetXTitle(Xaxis_label)
-            h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
+            h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
 
             h_all_background.Draw("HIST")
             h_other_background.Draw("HISTSAME")

@@ -7,8 +7,7 @@ do
     executeprocesses="$(pgrep execute -u ap17080 | wc -l)"
     for config in $configSet
     do
-        echo "Begining"
-        echo $config
+        echo "Begining to process" $config
         nice -n 1 nohup sh -c "./execute $config" &
         executeprocesses="$(pgrep execute -u ap17080 | wc -l)"
         while [ $executeprocesses -gt 7 ]
