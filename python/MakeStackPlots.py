@@ -425,31 +425,55 @@ for HistoName in histoNames:
                 h_other_background_list.append(h_singleTop_background)
 
             h_other_background = sumHistosList(h_other_background_list)
-            h_all_background = h_ttbar_background + h_other_background
 
-            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
-                h_sig_Hplus_m400.Scale(5)
-                h_sig_Hplus_m400n = h_sig_Hplus_m400+h_all_background
-            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                h_sig_Hplus_m800.Scale(5)
-                h_sig_Hplus_m800n = h_sig_Hplus_m800+h_all_background
-            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                h_sig_Hplus_m1600.Scale(5)
-                h_sig_Hplus_m1600n = h_sig_Hplus_m1600+h_all_background
+            print(h_other_background_list)
 
-            h_all_background.SetLineColor(1)
-            h_all_background.SetFillColor(kGreen+3)
-            h_other_background.SetLineColor(1)
-            h_other_background.SetFillColor(kRed-3)
+            if h_other_background_list == []:
+                if config["Plot_ttbar"] == "Enable" or config["Plot_ttbarSherpa"] == "Enable":
+                    h_all_background = h_ttbar_background
+                else:
+                    h_all_background = 0
+            else:
+                h_all_background = h_ttbar_background + h_other_background
+
+            if h_all_background == 0:
+                if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                    h_sig_Hplus_m400.Scale(5)
+                    h_sig_Hplus_m400n = h_sig_Hplus_m400d
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    h_sig_Hplus_m800.Scale(5)
+                    h_sig_Hplus_m800n = h_sig_Hplus_m800
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600.Scale(5)
+                    h_sig_Hplus_m1600n = h_sig_Hplus_m1600
+            else:
+                if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                    h_sig_Hplus_m400.Scale(5)
+                    h_sig_Hplus_m400n = h_sig_Hplus_m400+h_all_background
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    h_sig_Hplus_m800.Scale(5)
+                    h_sig_Hplus_m800n = h_sig_Hplus_m800+h_all_background
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600.Scale(5)
+                    h_sig_Hplus_m1600n = h_sig_Hplus_m1600+h_all_background
+
+            if h_all_background != 0:
+                h_all_background.SetLineColor(1)
+                h_all_background.SetFillColor(kGreen+3)
+            if h_other_background_list != []:
+                h_other_background.SetLineColor(1)
+                h_other_background.SetFillColor(kRed-3)
 
             nbins = 20
             ymax = 0
             # NormalizeHisto(h_other_background)
-            if ymax < h_other_background.GetMaximum():
-                ymax = h_other_background.GetMaximum()
+            if h_other_background_list != []:
+                if ymax < h_other_background.GetMaximum():
+                    ymax = h_other_background.GetMaximum()
             # NormalizeHisto(h_all_background)
-            if ymax < h_all_background.GetMaximum():
-                ymax = h_all_background.GetMaximum()
+            if h_all_background != 0:
+                if ymax < h_all_background.GetMaximum():
+                    ymax = h_all_background.GetMaximum()
 
             if config["Plot_ttbar"] == "Enable" or config["Plot_ttbarSherpa"] == "Enable":
                 # NormalizeHisto(h_ttbar_background)
@@ -469,19 +493,51 @@ for HistoName in histoNames:
                 if ymax < h_sig_Hplus_m1600.GetMaximum():
                     ymax = h_sig_Hplus_m1600.GetMaximum()
 
-            h_all_background.SetNdivisions(8)
-            h_all_background.SetXTitle(Xaxis_label)
-            h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
-
-            h_all_background.Draw("HIST")
-            h_other_background.Draw("HISTSAME")
-
-            if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
-                h_sig_Hplus_m400n.Draw("HISTSAME")
-            if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                h_sig_Hplus_m800n.Draw("HISTSAME")
-            if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                h_sig_Hplus_m1600n.Draw("HISTSAME")
+            if h_all_background != 0:
+                h_all_background.SetNdivisions(8)
+                h_all_background.SetXTitle(Xaxis_label)
+                h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_all_background.Draw("HIST")
+                if h_other_background_list != []:
+                    h_other_background.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                    h_sig_Hplus_m400n.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    h_sig_Hplus_m800n.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600n.Draw("HISTSAME")
+            elif h_other_background_list != []:
+                h_other_background.SetNdivisions(8)
+                h_other_background.SetXTitle(Xaxis_label)
+                h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_other_background.Draw("HIST")
+                if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                    h_sig_Hplus_m400n.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    h_sig_Hplus_m800n.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600n.Draw("HISTSAME")
+            elif config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                h_sig_Hplus_m400.SetNdivisions(8)
+                h_sig_Hplus_m400.SetXTitle(Xaxis_label)
+                h_sig_Hplus_m400.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m400.Draw("HIST")
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    h_sig_Hplus_m800n.Draw("HISTSAME")
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600n.Draw("HISTSAME")
+            elif config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                h_sig_Hplus_m800.SetNdivisions(8)
+                h_sig_Hplus_m800.SetXTitle(Xaxis_label)
+                h_sig_Hplus_m800.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m800.Draw("HIST")
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    h_sig_Hplus_m1600n.Draw("HISTSAME")
+            elif config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                h_sig_Hplus_m1600.SetNdivisions(8)
+                h_sig_Hplus_m1600.SetXTitle(Xaxis_label)
+                h_sig_Hplus_m1600.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m1600.Draw("HIST")
 
             leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)
             atlas_lable = ATLAS_LABEL(0.19, 0.95)
@@ -501,8 +557,11 @@ for HistoName in histoNames:
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 leg.AddEntry(h_sig_Hplus_m1600,
                              "H^{+}#rightarrow hW^{+} (m_{H^{+}}=1600GeV) x5", "L")
-            leg.AddEntry(h_all_background,    "t#bar{t}", "F")
-            leg.AddEntry(h_other_background,  "other backgrounds", "F")
+
+            if h_all_background != 0:
+                leg.AddEntry(h_all_background,    "t#bar{t}", "F")
+            if h_other_background_list != []:
+                leg.AddEntry(h_other_background,  "other backgrounds", "F")
             leg.Draw()
             c1.RedrawAxis()
             c1.Update()

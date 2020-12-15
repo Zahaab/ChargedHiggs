@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-FILES=/home/ap17080/Thesis/ChargedHiggs/configFiles/configSet*
+FILES=/home/ap17080/Thesis/ChargedHiggs/configFiles/miscConfig*
 for configSets in $FILES
 do 
     configSet=$configSets/*

@@ -328,18 +328,18 @@ bool EventLoop::FindFJetPair()
     bool status = false;
     if (Lepton_Charge < 0.)
     {
-        if (nTaggedVRTrkJetsInFJet.at(0) != nTaggedVRTrkJetsInFJet.at(1))
-        {
-            Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
-            Wplus = nTaggedVRTrkJetsInFJet.at(0) < nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
-            m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
-        }
-        else
-        {
-            Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-            Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-            m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
-        }
+        // if (nTaggedVRTrkJetsInFJet.at(0) != nTaggedVRTrkJetsInFJet.at(1))
+        // {
+        //     Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
+        //     Wplus = nTaggedVRTrkJetsInFJet.at(0) < nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
+        //     m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+        // }
+        // else
+        // {
+        Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+        Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+        m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+        // }
         m_ntagsOutside = m_NTags_trkJ - (nTaggedVRTrkJetsInFJet.at(0) + nTaggedVRTrkJetsInFJet.at(1));
         m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
         m_NTags = GetBTagCategoryShort(m_NTags_Higgs, m_ntagsOutside);
