@@ -336,9 +336,7 @@ bool EventLoop::FindFJetPair()
         // }
         // else
         // {
-        Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-        Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-        m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+        SetJetPair();
         // }
         m_ntagsOutside = m_NTags_trkJ - (nTaggedVRTrkJetsInFJet.at(0) + nTaggedVRTrkJetsInFJet.at(1));
         m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
@@ -359,6 +357,26 @@ bool EventLoop::FindFJetPair()
     m_DeltaPhi_HW = fabs(Wplus.DeltaPhi(Higgs));
     m_mVH = (Wplus + Higgs).M() * 0.001;
     return status;
+}
+
+void EventLoop::SetJetPair()
+{
+    Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+    Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+    m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+    for (int i = 2; i < FJets.size(); i++)
+    {
+        if (Higgs.M() < FJets.at(i).M())
+        {
+            Wplus = Higgs;
+            Higgs = FJets.at(i);
+            m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(i);
+        }
+        else if (Wplus.M() < FJets.at(i).M())
+        {
+            Wplus = FJets.at(i);
+        }
+    }
 }
 
 bool EventLoop::FindJetPair_qqbb()

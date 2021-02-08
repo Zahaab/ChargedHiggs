@@ -426,8 +426,6 @@ for HistoName in histoNames:
 
             h_other_background = sumHistosList(h_other_background_list)
 
-            print(h_other_background_list)
-
             if h_other_background_list == []:
                 if config["Plot_ttbar"] == "Enable" or config["Plot_ttbarSherpa"] == "Enable":
                     h_all_background = h_ttbar_background
