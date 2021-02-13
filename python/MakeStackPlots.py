@@ -564,5 +564,7 @@ for HistoName in histoNames:
             c1.RedrawAxis()
             c1.Update()
             c1.RedrawAxis()
+            if HistoName == "nJets_(Fat)":
+                print("HEY DUDE IDK WHY THIS DOSN'T WORK EITHER")
             c1.SaveAs(histoDir + "/ShapePlot_%s_lvbb.pdf" %
                       (HistoName+"_"+Region+"_"+btagStrategy))

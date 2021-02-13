@@ -163,6 +163,7 @@ public:
    TH1Fs *h_Lepton_Eta;
    TH1Fs *h_Lepton_Pt;
    TH1Fs *h_Njets;
+   TH1Fs *h_NFjets;
    TH1Fs *h_Mwt;
    TH1Fs *h_MinDeltaPhiJETMET;
    TH1Fs *h_HT;
@@ -481,6 +482,7 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    h_Lepton_Pt = new TH1Fs(sampleName + "_Lepton_Pt", "", 25, 0, 600, mySel, m_UncNames, ExpUncertaintyName);
    h_NBtags = new TH1Fs(sampleName + "_nBTags", "", 7, -0.5, 6.5, mySel, m_UncNames, ExpUncertaintyName);
    h_Njets = new TH1Fs(sampleName + "_nJets", "", 13, -0.5, 12.5, mySel, m_UncNames, ExpUncertaintyName);
+   h_NFjets = new TH1Fs(sampleName + "_nJets_(Fat)", "", 13, -0.5, 12.5, mySel, m_UncNames, ExpUncertaintyName);
    h_Mwt = new TH1Fs(sampleName + "_Mwt", "", 30, 0, 300, mySel, m_UncNames, ExpUncertaintyName);
    h_MinDeltaPhiJETMET = new TH1Fs(sampleName + "_MinDeltaPhiJETMET", "", 32, 0, 3.2, mySel, m_UncNames, ExpUncertaintyName);
    h_HT = new TH1Fs(sampleName + "_HT", "", 30, 0, 1500, mySel, m_UncNames, ExpUncertaintyName);

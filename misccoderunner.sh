@@ -1,5 +1,5 @@
 #!/usr/bin/bash
 
-nice -n 1 nohup sh -c './execute configFiles/miscConfig/configSet2.txt >configFiles/configLogs/miscConfigSet2.log' &
-
-nice -n 1 nohup sh -c './execute configFiles/miscConfig/configSet3.txt >configFiles/configLogs/miscConfigSet3.log' &
+nice -n 1 nohup sh -c './execute configFiles/miscConfig/config400.txt ' &
+nice -n 1 nohup sh -c './execute configFiles/miscConfig/config800.txt ' &
+nice -n 1 nohup sh -c './execute configFiles/miscConfig/config1600.txt ' &

@@ -62,6 +62,10 @@ def getaxisLabels(HistoName):
         Xaxis_label = "b-Tag Multiplicity"
         legend_place = [0.19, 0.73, 0.45, 0.885]
         text_place = [0.19, 0.895]
+    elif "nJets_(Fat)" == HistoName:
+        Xaxis_label = "(Fat)b-Tag Multiplicity"
+        legend_place = [0.19, 0.73, 0.45, 0.885]
+        text_place = [0.19, 0.895]
     elif "nBTags" == HistoName:
         Xaxis_label = "Number of b-tags"
         legend_place = [0.69, 0.795, 0.95, 0.95]

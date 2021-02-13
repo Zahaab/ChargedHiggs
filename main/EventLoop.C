@@ -57,9 +57,10 @@ void EventLoop::Loop()
         if (!passed_merged_preselection && !passed_resovled_preselction)
             continue;
 
-        /*if(Jets.size() >= 4 && Lepton_Charge < 0){
-          MatchTruthParticlesToJets();
-      }*/
+        if (Jets.size() >= 4 && Lepton_Charge < 0)
+        {
+            MatchTruthParticlesToJets();
+        }
 
         if (passed_merged_preselection)
         {
@@ -116,6 +117,7 @@ void EventLoop::Loop()
             h_Lepton_Pt->Fill(Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_NBtags->Fill(m_NTags, m_EventWeights, pass_sel, m_NTags);
             h_Njets->Fill(Jets.size(), m_EventWeights, pass_sel, m_NTags);
+            h_NFjets->Fill(FJets.size(), m_EventWeights, pass_sel, m_NTags);
             h_Mwt->Fill(m_mWT, m_EventWeights, pass_sel, m_NTags);
             h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
             h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
@@ -711,6 +713,7 @@ void EventLoop::Write(TDirectory *dir, std::string dirname)
     h_Lepton_Eta->Write(dir, ("Lepton_Eta"));
     h_Lepton_Pt->Write(dir, ("Lepton_Pt"));
     h_Njets->Write(dir, ("nJets"));
+    h_NFjets->Write(dir, ("nJets_(Fat)"));
     h_NBtags->Write(dir, ("nBTags"));
     h_HT->Write(dir, ("HT"));
     h_HT_bjets->Write(dir, ("HT_bjets"));

@@ -26,7 +26,6 @@ int main(int argc, char **argv)
   TString WP = config["WP"];
   TString OUTPUTDIR = config["OUTPUTDIR"];
   bool batchMode = atoi(config["batchMode"].c_str());
-  TString OutFileName = SampleName;
   // This is where we initialise TreeNames as an empty vector of
   // strings.
   std::vector<std::string> TreeNames;
@@ -35,6 +34,7 @@ int main(int argc, char **argv)
   std::string stdpath = config["path"];
   auto MCDataPeriodes = parseDataPeriodes(config);
   auto index = stdpath.find("MC16");
+
   if (index == std::string::npos)
   {
     throw std::runtime_error(std::string("Error: not in path"));
@@ -44,6 +44,7 @@ int main(int argc, char **argv)
   {
     path = TString(stdpath.replace(index, 5, stdMCDataPeriode));
     MCDataPeriode = TString(stdMCDataPeriode);
+    TString OutFileName = SampleName;
     // This creates a file using event data changing the end of sample name.
     // The naming convention here is the name of the input data + WP + data period + the variation.
     OutFileName.ReplaceAll(".root", "_" + WP + "_" + MCDataPeriode + "_" + config["Higgs_mass_lower_bound"] + "-" + config["Higgs_mass_upper_bound"] + "-" +
