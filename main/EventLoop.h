@@ -134,7 +134,8 @@ public:
    double EvaluateMVAResponse_lvbb(int i_H1, int i_H2, TLorentzVector W);
    bool FindJetPair_qqbb();
    bool FindJetPair_lvbb();
-   bool FindFJetPair();
+   bool FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
+                     Float_t hw_angle, Float_t solo_jet_ptv);
    void SetJetPair();
    bool PassEventSelectionResolved();
    bool PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle, Float_t hw_angle,

@@ -325,33 +325,30 @@ void EventLoop::FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_sign
     m_myTree->Fill();
 }
 
-bool EventLoop::FindFJetPair()
+bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
+                             Float_t hw_angle, Float_t solo_jet_ptv)
 {
     bool status_W = false;
     bool status = false;
     if (Lepton_Charge < 0.)
     {
-        // if (nTaggedVRTrkJetsInFJet.at(0) != nTaggedVRTrkJetsInFJet.at(1))
-        // {
-        //     Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
-        //     Wplus = nTaggedVRTrkJetsInFJet.at(0) < nTaggedVRTrkJetsInFJet.at(1) ? FJets.at(0) : FJets.at(1);
-        //     m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(0) > nTaggedVRTrkJetsInFJet.at(1) ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
-        // }
-        // else
-        // {
         SetJetPair();
-        // }
         m_ntagsOutside = m_NTags_trkJ - (m_NTags_Higgs + m_NTags_Wplus);
         m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
         m_NTags = GetBTagCategoryShort(m_NTags_Higgs, m_ntagsOutside);
-        if (Higgs.Pt() > 250000)
+        if (Higgs.Pt() > jet0_ptv &&
+            Wplus.Pt() > jet1_ptv &&
+            Higgs.DeltaR(*Lepton4vector) > lep_jet0_angle &&
+            Wplus.DeltaR(*Lepton4vector) > lep_jet1_angle &&
+            m_DeltaPhi_HW > hw_angle)
             status = true;
     }
     else if (Lepton_Charge > 0.)
     {
         Higgs = FJets.at(0);
         Wplus = GetWBoson(status_W);
-        if (status_W)
+        if (status_W &&
+            Higgs.Pt() > solo_jet_ptv)
             status = true;
         m_ntagsOutside = m_NTags_trkJ - nTaggedVRTrkJetsInFJet.at(0);
         m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
@@ -541,35 +538,11 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
         return false;
     if (Lepton4vector->Pt() < lep_ptv)
         return false;
-    if (Lepton_Charge < 0)
-    {
-        if (FJets.size() < 2)
-            return false;
-        if (FJets.at(0).Pt() < jet0_ptv)
-            return false;
-        if (FJets.at(1).Pt() < jet1_ptv)
-            return false;
-        if (FJets.at(0).DeltaR(*Lepton4vector) < lep_jet0_angle)
-            return false;
-        if (FJets.at(1).DeltaR(*Lepton4vector) < lep_jet1_angle)
-            return false;
-        if (!FindFJetPair())
-            return false;
-        if (m_DeltaPhi_HW < hw_angle)
-            return false;
-    }
-    else
-    {
-        ///if(MET->Pt() < 30000)return false;             ///  increase MET pT cut !?!?!
-        ///if(Lepton4vector->Pt() < 30000)return false;   ///  increase lepton pT cut ?!?!
-        if (FJets.size() < 1)
-            return false;
-        if (FJets.at(0).Pt() < solo_jet_ptv)
-            return false;
-        if (!FindFJetPair())
-            return false;
-    }
-    return true;
+    if (Lepton_Charge < 0 && FJets.size() < 2 || Lepton_Charge > 0 && FJets.size() < 1)
+        return false;
+
+    return FindFJetPair(jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
+                        hw_angle, solo_jet_ptv);
 }
 
 bool EventLoop::PassEventSelectionResolved()
