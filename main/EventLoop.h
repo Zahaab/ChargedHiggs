@@ -182,6 +182,7 @@ public:
    TH1Fs *h_tagCategory;
    TH1Fs *h_mass_resolution;
    TH1Fs *h_MET_over_sqrtHT;
+   TH1Fs *h_m_NTags_trkJ;
 
    vector<double> m_EventWeights;
    vector<TString> m_UncNames;
@@ -203,6 +204,7 @@ public:
    int m_NTags_caloJ;
    int m_NTags_trkJ;
    int m_NTags_Higgs;
+   int m_NTags_Wplus;
    int m_ntagsOutside;
    int m_bTagCategory;
    int m_btagCategoryBin;
@@ -501,6 +503,7 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    h_tagCategory = new TH1Fs(sampleName + "_BtagCategory", "", 11, -0.5, 10.5, mySel, m_UncNames, ExpUncertaintyName);
    h_mass_resolution = new TH1Fs(sampleName + "_mass_resolution", "", 20, -1.0, 1.0, mySel, m_UncNames, ExpUncertaintyName);
    h_MET_over_sqrtHT = new TH1Fs(sampleName + "_MET_over_rootHT", "", 30, 0, 600, mySel, m_UncNames, ExpUncertaintyName);
+   h_m_NTags_trkJ = new TH1Fs(sampleName + "_m_NTags_trkJ", "", 13, -0.5, 12.5, mySel, m_UncNames, ExpUncertaintyName);
 
    // Set object pointer
    Description = 0;

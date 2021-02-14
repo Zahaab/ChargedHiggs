@@ -136,6 +136,7 @@ void EventLoop::Loop()
             h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
             h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
             h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
+            h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
         }
         ////WriteMVAInput();
     }
@@ -340,7 +341,7 @@ bool EventLoop::FindFJetPair()
         // {
         SetJetPair();
         // }
-        m_ntagsOutside = m_NTags_trkJ - (nTaggedVRTrkJetsInFJet.at(0) + nTaggedVRTrkJetsInFJet.at(1));
+        m_ntagsOutside = m_NTags_trkJ - (m_NTags_Higgs + m_NTags_Wplus);
         m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
         m_NTags = GetBTagCategoryShort(m_NTags_Higgs, m_ntagsOutside);
         if (Higgs.Pt() > 250000)
@@ -366,17 +367,20 @@ void EventLoop::SetJetPair()
     Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
     Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
     m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+    m_NTags_Wplus = FJets.at(0).M() < FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
     for (int i = 2; i < FJets.size(); i++)
     {
         if (Higgs.M() < FJets.at(i).M())
         {
             Wplus = Higgs;
+            m_NTags_Wplus = m_NTags_Higgs;
             Higgs = FJets.at(i);
             m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(i);
         }
         else if (Wplus.M() < FJets.at(i).M())
         {
             Wplus = FJets.at(i);
+            m_NTags_Wplus = nTaggedVRTrkJetsInFJet.at(i);
         }
     }
 }
@@ -731,6 +735,7 @@ void EventLoop::Write(TDirectory *dir, std::string dirname)
     h_tagCategory->Write(dir, ("BtagCategory"));
     h_mass_resolution->Write(dir, ("mass_resolution"));
     h_MET_over_sqrtHT->Write(dir, ("MET_over_rootHT"));
+    h_m_NTags_trkJ->Write(dir, ("m_NTags_trkJ"));
     dir->cd();
     m_myTree->Write();
 }
