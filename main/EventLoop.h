@@ -17,6 +17,7 @@
 #include "TLorentzVector.h"
 #include "vector"
 #include <iostream>
+#include <fstream>
 
 #include "utilis/Chi2_minimization.h"
 #include "utilis/NeutrinoBuilder.h"
@@ -117,7 +118,7 @@ public:
              Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
              Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
 
-   EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map<std::string, std::string> config);
+   EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileName, std::unordered_map<std::string, std::string> config);
 
    void Write(TDirectory *dir, std::string dirname);
    void FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_signal);
@@ -271,13 +272,29 @@ public:
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
    int EventReadout = 0;
+
+   //cutflow of config parameters
+   ofstream m_cutFlowFileStream;
+   TString m_cutFlowFileName;
+   int m_METCutFlow = 0;
+   int m_LeptonPtCutFlow = 0;
+   int m_LeptonChargeCutFlow = 0;
+   int m_HiggsPtCutFlow = 0;
+   int m_WplusPtCutFlow = 0;
+   int m_Higgs_LeptonAngleCutflow = 0;
+   int m_Wplus_LeptonAngleCutflow = 0;
+   int m_Higgs_WplusAngleCutflow = 0;
+   int m_PositiveLepWCutflow = 0;
+   int m_PositiveLepHiggsPtCutFlow = 0;
+   int m_HiggsMassCutFlow = 0;
+   int m_WplusMassCutFlow = 0;
 };
 
 #endif
 
 #ifdef EventLoop_cxx
 
-EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map<std::string, std::string> config) : fChain(0)
+EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileName, std::unordered_map<std::string, std::string> config) : fChain(0)
 {
    if (tree == 0)
    {
@@ -374,11 +391,8 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, std::unordered_map
       m_btagCut_value_CaloJets = 0.94;
       m_btagCategoryBin = 4;
    }
-
-   // std::cout << "Using WP = " << WP << " corresponding to w_{MVA} > " << m_btagCut_value_trkJets << "\n";
-   // std::cout << WP << "  |  " << hmlb << "  |  " << hmub << "  |  " << wmlb << "  |  " << wmub << "  |  " << met_ptv << "  |  " << lep_ptv << "  |  " << jet0_ptv << "  |  "
-   //           << jet1_ptv << "  |  " << lep_jet0_angle << "  |  " << lep_jet1_angle << "  |  " << hw_angle << "  |  " << solo_jet_ptv << "\n";
-   // std::cout << m_btagCut_value_trkJets << "\n";
+   outFileName.ReplaceAll(".root", "-cutFlow.txt");
+   m_cutFlowFileName = outFileName;
    Init(tree, SampleName, ExpUncertaintyName);
 }
 
@@ -439,6 +453,21 @@ EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName
 
 EventLoop::~EventLoop()
 {
+   m_cutFlowFileStream.open(m_cutFlowFileName);
+   m_cutFlowFileStream << "MET=" << m_METCutFlow << "\n";
+   m_cutFlowFileStream << "Lepton_momentum=" << m_LeptonPtCutFlow << "\n";
+   m_cutFlowFileStream << "Lepton_Charge=" << m_LeptonChargeCutFlow << "\n";
+   m_cutFlowFileStream << "Higgs_momentum=" << m_HiggsPtCutFlow << "\n";
+   m_cutFlowFileStream << "Wboson_momentum=" << m_WplusPtCutFlow << "\n";
+   m_cutFlowFileStream << "Higgs_Lepton_Angle=" << m_Higgs_LeptonAngleCutflow << "\n";
+   m_cutFlowFileStream << "Wboson_Lepton_Angle=" << m_Wplus_LeptonAngleCutflow << "\n";
+   m_cutFlowFileStream << "Higgs_Wboson_Angle=" << m_Higgs_WplusAngleCutflow << "\n";
+   m_cutFlowFileStream << "PositiveLep_Wboson_bool=" << m_PositiveLepWCutflow << "\n";
+   m_cutFlowFileStream << "PositiveLep_Wboson_bool=" << m_PositiveLepHiggsPtCutFlow << "\n";
+   m_cutFlowFileStream << "Higgs_Mass=" << m_HiggsMassCutFlow << "\n";
+   m_cutFlowFileStream << "Wplus_Mass=" << m_WplusMassCutFlow << "\n";
+   m_cutFlowFileStream.close();
+
    if (!fChain)
       return;
    delete fChain->GetCurrentFile();

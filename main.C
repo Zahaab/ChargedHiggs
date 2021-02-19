@@ -68,7 +68,7 @@ int main(int argc, char **argv)
       mych_data->Add(OUTPUTDIR + "/" + path + "/" + SampleName);
       // This prints GetEntries from the Tchain to the terminal
       std::cout << mych_data->GetEntries() << "  " << path + "/" + SampleName << std::endl;
-      EventLoop *eventLoop = new EventLoop(mych_data, TreeName, config);
+      EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
       std::cout << "working"
                 << "\n";
       eventLoop->Loop();
