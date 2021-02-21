@@ -463,7 +463,7 @@ EventLoop::~EventLoop()
    m_cutFlowFileStream << "Wboson_Lepton_Angle=" << m_Wplus_LeptonAngleCutflow << "\n";
    m_cutFlowFileStream << "Higgs_Wboson_Angle=" << m_Higgs_WplusAngleCutflow << "\n";
    m_cutFlowFileStream << "PositiveLep_Wboson_bool=" << m_PositiveLepWCutflow << "\n";
-   m_cutFlowFileStream << "PositiveLep_Wboson_bool=" << m_PositiveLepHiggsPtCutFlow << "\n";
+   m_cutFlowFileStream << "PositiveLep_Higgs_bool=" << m_PositiveLepHiggsPtCutFlow << "\n";
    m_cutFlowFileStream << "Higgs_Mass=" << m_HiggsMassCutFlow << "\n";
    m_cutFlowFileStream << "Wplus_Mass=" << m_WplusMassCutFlow << "\n";
    m_cutFlowFileStream.close();

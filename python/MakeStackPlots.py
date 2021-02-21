@@ -32,6 +32,76 @@ except OSError:
 else:
     print "Successfully created the directory %s " % outputdir
 
+# THIS IS WHERE THE ACCEPTANCE IS HANDELED
+
+cutParameters = ["MET", "Lepton_momentum", "Lepton_Charge", "Higgs_momentum", "Wboson_momentum", "Higgs_Lepton_Angle",
+                 "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool", "PositiveLep_Higgs_bool",
+                 "Higgs_Mass", "Wplus_Mass"]
+
+
+cutFlowFile = open(outputdir + "/cutflow.txt", 'w')
+cutFlowFile.truncate(0)  # to ensure the file is empty
+cutFlowFile.write("Data-Set,"+",".join(cutParameters) + "," + "Total" + "\n")
+
+for variable in plotEvents:
+    cutFlowHold = {}
+    cutFlowValues = []
+    for parameter in cutParameters:
+        cutFlowHold[parameter] = []
+    for dataPeriode in MCDataPeriodes:
+        cutFlowPath = histoFiles[dataPeriode][variable].replace(
+            ".root", "-cutFlow.txt")
+        rawCutFlow = open("../PlotFiles/"+cutFlowPath, "r")
+        cutFlow_content = rawCutFlow.read().split("\n")
+        for index, parameter in enumerate(cutParameters):
+            cutFlowValue = cutFlow_content[index].split("=")[1]
+            cutFlowHold[parameter].append(int(cutFlowValue))
+        rawCutFlow.close()
+    cutFlowTotal = sum([sum(cutFlowHold[parameter])
+                        for parameter in cutParameters])
+    cutFlowValues = [str(sum(cutFlowHold[parameter]))
+                     for parameter in cutParameters]
+    cutFlowFile.write(
+        variable + "," + ",".join(cutFlowValues) + "," + str(cutFlowTotal) + "\n")
+
+cutFlowFile.close()
+
+# THIS IS WHERE THE ACCEPTANCE IS HANDELED
+
+# THIS IS FOR SIGNIFICANCE WHICH IS CALCULATED DURING GRAPHING
+
+signalMasses = []
+for btagStrategy in btagStrategies:
+    if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+        signalMasses.append("400GeV_Signal" + btagStrategy)
+    if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+        signalMasses.append("800GeV_Signal" + btagStrategy)
+    if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+        signalMasses.append("1600GeV_Signal" + btagStrategy)
+
+significanceFile = open(outputdir + "/significance.txt", 'w')
+significanceFile.truncate(0)  # to ensure the file is empty
+significanceFile.write(
+    "HisogramName,"+",".join(signalMasses) + "\n")
+
+
+def calcSignificance(signalHisto, backgroundHisto):
+    h1 = signalHisto.Clone()
+    h2 = backgroundHisto.Clone()
+    sigList = []
+    for i in range(h1.GetNbinsX()):
+        signal = abs(h1.GetBinContent(i))
+        background = abs(h2.GetBinContent(i))
+        if signal and background != 0.0:
+            x = 2 * ((signal+background) *
+                     math.log(1+(signal/background)) - signal)
+            sigList.append(x)
+    significance = math.sqrt(sum(sigList))
+    return significance
+
+# NOW WE GRAPH THE FIGURES
+
+
 gROOT.SetBatch(True)
 gStyle.SetOptStat(0)
 gStyle.SetPalette(1)
@@ -54,7 +124,6 @@ def sumHistosList(histo_list):
             else:
                 resultHisto += i
     return resultHisto
-
 
 # def NormalizeHisto(histo):
 #     n_events = histo.Integral(-1, histo.GetNbinsX()+1)
@@ -79,9 +148,7 @@ def sumHistosList(histo_list):
 
 c1 = TCanvas("ShapePlots", "", 720, 720)
 
-# for HistoName in ["Mwt", "Lepton_Pt", "HT", "mVH"]:
-#    for Region in ["Resolved_LepP_SR", "Resolved_LepP_CR"]:
-#        for btagStrategy in ["TwoTags", "ThreeTags"]:
+
 for HistoName in histoNames:
     histoDir = outputdir + "/" + HistoName
     try:
@@ -93,6 +160,7 @@ for HistoName in histoNames:
     test_pl1, test_pl2 = text_place
 
     for Region in ["Merged_LepN_SR"]:
+        significanceValues = []
         for btagStrategy in btagStrategies:
             ReBin = False
             if config["Rebin"] == "Enable":
@@ -100,7 +168,6 @@ for HistoName in histoNames:
             else:
                 ReBin = False
             YAxisScale = 1.4
-            # correct problem in maker: wrong normalisation
             dscale = 1.223695
             escale = 1.61419497
             h_other_background_list = []
@@ -135,6 +202,7 @@ for HistoName in histoNames:
                     h_sig_Hplus_m400list.append(h_sig_Hplus_m400e)
 
                 h_sig_Hplus_m400 = sumHistosList(h_sig_Hplus_m400list)
+                print(h_sig_Hplus_m400)
                 h_sig_Hplus_m400.SetLineColor(kBlack)
                 h_sig_Hplus_m400.SetLineStyle(7)
                 if ReBin == True:
@@ -434,6 +502,29 @@ for HistoName in histoNames:
             else:
                 h_all_background = h_ttbar_background + h_other_background
 
+            # THIS IS WHERE THE SIGNIFICANCE IS HANDELED
+
+            if h_all_background != 0:
+                if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
+                    significanceValues.append(calcSignificance(
+                        h_sig_Hplus_m400, h_all_background))
+                else:
+                    significanceValues.append("NaN")
+                if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
+                    significanceValues.append(calcSignificance(
+                        h_sig_Hplus_m800, h_all_background))
+                else:
+                    significanceValues.append("NaN")
+                if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
+                    significanceValues.append(calcSignificance(
+                        h_sig_Hplus_m1600, h_all_background))
+                else:
+                    significanceValues.append("NaN")
+
+            # THIS IS WHERE THE SIGNIFICANCE IS HANDELED
+
+            # BACK TO GRAPHING
+
             if h_all_background == 0:
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400.Scale(5)
@@ -564,7 +655,9 @@ for HistoName in histoNames:
             c1.RedrawAxis()
             c1.Update()
             c1.RedrawAxis()
-            if HistoName == "nJets_(Fat)":
-                print("HEY DUDE IDK WHY THIS DOSN'T WORK EITHER")
             c1.SaveAs(histoDir + "/ShapePlot_%s_lvbb.pdf" %
                       (HistoName+"_"+Region+"_"+btagStrategy))
+
+        significanceFile.write(
+            HistoName + "," + ",".join(significanceValues) + "\n")
+significanceFile.close()
