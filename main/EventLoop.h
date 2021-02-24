@@ -137,6 +137,7 @@ public:
    bool FindJetPair_lvbb();
    bool FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                      Float_t hw_angle, Float_t solo_jet_ptv);
+
    void SetJetPair();
    bool PassEventSelectionResolved();
    bool PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle, Float_t hw_angle,
@@ -276,18 +277,43 @@ public:
    //cutflow of config parameters
    ofstream m_cutFlowFileStream;
    TString m_cutFlowFileName;
-   int m_METCutFlow = 0;
-   int m_LeptonPtCutFlow = 0;
-   int m_LeptonChargeCutFlow = 0;
-   int m_HiggsPtCutFlow = 0;
-   int m_WplusPtCutFlow = 0;
-   int m_Higgs_LeptonAngleCutflow = 0;
-   int m_Wplus_LeptonAngleCutflow = 0;
-   int m_Higgs_WplusAngleCutflow = 0;
-   int m_PositiveLepWCutflow = 0;
-   int m_PositiveLepHiggsPtCutFlow = 0;
-   int m_HiggsMassCutFlow = 0;
-   int m_WplusMassCutFlow = 0;
+   struct CutFlowType
+   {
+      int twoTags = 0;
+      int threeTags = 0;
+      int fourPlusTags = 0;
+      Float_t weightedTwoTags = 0;
+      Float_t weightedThreeTags = 0;
+      Float_t weightedFourPlusTags = 0;
+
+      int Total() const
+      {
+         return twoTags + threeTags + fourPlusTags;
+      }
+
+      Float_t WeightedTotal() const
+      {
+         return weightedTwoTags + weightedThreeTags + weightedFourPlusTags;
+      }
+   };
+
+   void CutFlowAssignment(CutFlowType &cutVariable);
+   void CutFlowParser(const CutFlowType &cutVariable, const std::string cutName);
+   CutFlowType m_TotalEvents;
+   CutFlowType m_noJets;
+   CutFlowType m_METCutFlow;
+   CutFlowType m_LeptonPtCutFlow;
+   CutFlowType m_HadronicCutFlow;
+   CutFlowType m_LeptonicCutFlow;
+   CutFlowType m_HiggsPtCutFlow;
+   CutFlowType m_WplusPtCutFlow;
+   CutFlowType m_Higgs_LeptonAngleCutflow;
+   CutFlowType m_Wplus_LeptonAngleCutflow;
+   CutFlowType m_Higgs_WplusAngleCutflow;
+   CutFlowType m_PositiveLepWCutflow;
+   CutFlowType m_PositiveLepHiggsPtCutFlow;
+   CutFlowType m_HiggsMassCutFlow;
+   CutFlowType m_WplusMassCutFlow;
 };
 
 #endif
@@ -451,21 +477,36 @@ EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName
    Init(tree, sampleName, ExpUncertaintyName);
 }
 
+void EventLoop::CutFlowParser(const CutFlowType &cutVariable, const std::string cutName)
+{
+   m_cutFlowFileStream << cutName << "=" << cutVariable.twoTags << "," << cutVariable.threeTags << ","
+                       << cutVariable.fourPlusTags << "," << cutVariable.Total() << "\n"
+                       << "real" << cutName << "=" << cutVariable.weightedTwoTags << "," << cutVariable.weightedThreeTags << ","
+                       << cutVariable.weightedFourPlusTags << "," << cutVariable.WeightedTotal() << "\n";
+}
+
 EventLoop::~EventLoop()
 {
    m_cutFlowFileStream.open(m_cutFlowFileName);
-   m_cutFlowFileStream << "MET=" << m_METCutFlow << "\n";
-   m_cutFlowFileStream << "Lepton_momentum=" << m_LeptonPtCutFlow << "\n";
-   m_cutFlowFileStream << "Lepton_Charge=" << m_LeptonChargeCutFlow << "\n";
-   m_cutFlowFileStream << "Higgs_momentum=" << m_HiggsPtCutFlow << "\n";
-   m_cutFlowFileStream << "Wboson_momentum=" << m_WplusPtCutFlow << "\n";
-   m_cutFlowFileStream << "Higgs_Lepton_Angle=" << m_Higgs_LeptonAngleCutflow << "\n";
-   m_cutFlowFileStream << "Wboson_Lepton_Angle=" << m_Wplus_LeptonAngleCutflow << "\n";
-   m_cutFlowFileStream << "Higgs_Wboson_Angle=" << m_Higgs_WplusAngleCutflow << "\n";
-   m_cutFlowFileStream << "PositiveLep_Wboson_bool=" << m_PositiveLepWCutflow << "\n";
-   m_cutFlowFileStream << "PositiveLep_Higgs_bool=" << m_PositiveLepHiggsPtCutFlow << "\n";
-   m_cutFlowFileStream << "Higgs_Mass=" << m_HiggsMassCutFlow << "\n";
-   m_cutFlowFileStream << "Wplus_Mass=" << m_WplusMassCutFlow << "\n";
+   CutFlowParser(m_TotalEvents, "TotalEvents");
+   CutFlowParser(m_METCutFlow, "MET");
+   CutFlowParser(m_LeptonPtCutFlow, "Lepton_momentum");
+   CutFlowParser(m_HadronicCutFlow, "Hadronic_rejected");
+   CutFlowParser(m_LeptonicCutFlow, "Leptonic_rejected");
+   CutFlowParser(m_HiggsPtCutFlow, "Higgs_momentum");
+   CutFlowParser(m_WplusPtCutFlow, "Wboson_momentum");
+   CutFlowParser(m_Higgs_LeptonAngleCutflow, "Higgs_Lepton_Angle");
+   CutFlowParser(m_Wplus_LeptonAngleCutflow, "Wboson_Lepton_Angle");
+   CutFlowParser(m_Higgs_WplusAngleCutflow, "Higgs_Wboson_Angle");
+   CutFlowParser(m_PositiveLepWCutflow, "PositiveLep_Wboson_bool");
+   CutFlowParser(m_PositiveLepHiggsPtCutFlow, "PositiveLep_Higgs_bool");
+   CutFlowParser(m_HiggsMassCutFlow, "Higgs_Mass");
+   CutFlowParser(m_WplusMassCutFlow, "Wplus_Mass");
+   m_cutFlowFileStream << "noFatJets"
+                       << "=" << m_noJets.Total() << "\n"
+                       << "real"
+                       << "noFatJets"
+                       << "=" << m_noJets.WeightedTotal() << "\n";
    m_cutFlowFileStream.close();
 
    if (!fChain)
