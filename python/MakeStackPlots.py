@@ -34,35 +34,102 @@ else:
 
 # THIS IS WHERE THE ACCEPTANCE IS HANDELED
 
-cutParameters = ["MET", "Lepton_momentum", "Lepton_Charge", "Higgs_momentum", "Wboson_momentum", "Higgs_Lepton_Angle",
-                 "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool", "PositiveLep_Higgs_bool",
-                 "Higgs_Mass", "Wplus_Mass"]
+cutParameters = ["TotalEvents", "MET", "Lepton_momentum", "Hadronic_rejected", "Leptonic_rejected", "Higgs_momentum",
+                 "Wboson_momentum", "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
+                 "PositiveLep_Higgs_bool", "Higgs_Mass", "Wplus_Mass"]
+
+realCutParameters = ["real"+i for i in cutParameters]
+
+
+def cutFlowExtraction(content, cutParameters, cutHolder):
+    for index, parameter in enumerate(cutParameters):
+        tagged_values = content[index].split("=")[1].split(",")
+        for tagging, cutFlowValue in enumerate(tagged_values):
+            if tagged_values[tagging] == tagged_values[-1]:
+                cutHolder[parameter]["Total"].append(cutFlowValue)
+                continue
+            cutHolder[parameter][btagStrategies[tagging]].append(cutFlowValue)
+
+
+def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters, cutHolder):
+    for periodindex, dataPeriod in enumerate(dataPeriodes):
+        for btagStrategy in btagStrategies:
+            rowData = [data_set, dataPeriod, btagStrategy]
+            rowValues = []
+            for parameter in cutParameters:
+                rowValues.append(
+                    float(cutHolder[parameter][btagStrategy][periodindex]))
+                rowData.append(
+                    str(cutHolder[parameter][btagStrategy][periodindex]))
+            file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+        rowData = [data_set, dataPeriod, "All_Tagging"]
+        rowValues = []
+        for parameter in cutParameters:
+            rowValues.append(
+                float(cutHolder[parameter]["Total"][periodindex]))
+            rowData.append(
+                str(cutHolder[parameter]["Total"][periodindex]))
+        file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+    for btagStrategy in btagStrategies:
+        rowData = [data_set, "All_Data_Periods", btagStrategy]
+        rowValues = []
+        for parameter in cutParameters:
+            rowValues.append(float(sum(cutHolder[parameter][btagStrategy])))
+            rowData.append(str(sum(cutHolder[parameter][btagStrategy])))
+        file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+    rowData = [data_set, "All_Data_Periods", "All_Tagging"]
+    rowValues = []
+    for parameter in cutParameters:
+        rowValues.append(float(sum(cutHolder[parameter]["Total"])))
+        rowData.append(str(sum(cutHolder[parameter]["Total"])))
+    file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
 
 
 cutFlowFile = open(outputdir + "/cutflow.txt", 'w')
 cutFlowFile.truncate(0)  # to ensure the file is empty
-cutFlowFile.write("Data-Set,"+",".join(cutParameters) + "," + "Total" + "\n")
+cutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags,"
+                  ",".join(cutParameters) + "," + "Total" + "\n")
 
-for variable in plotEvents:
+realCutFlowFile = open(outputdir + "/realcutflow.txt", 'w')
+realCutFlowFile.truncate(0)  # to ensure the file is empty
+realCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags,"
+                      ",".join(realCutParameters) + "," + "Total" + "\n")
+
+for data_set in plotEvents:  # Grabs the data sets
     cutFlowHold = {}
-    cutFlowValues = []
+    realCutFlowHold = {}
+    cutFlow_content = []
+    realCutFlow_content = []
     for parameter in cutParameters:
-        cutFlowHold[parameter] = []
-    for dataPeriode in MCDataPeriodes:
-        cutFlowPath = histoFiles[dataPeriode][variable].replace(
+        cutFlowHold[parameter] = {}
+        realCutFlowHold["real"+parameter] = {}
+        for btagStrategy in btagStrategies:
+            cutFlowHold[parameter][btagStrategy] = []
+            realCutFlowHold["real"+parameter][btagStrategy] = []
+        cutFlowHold[parameter]["Total"] = []
+        realCutFlowHold["real"+parameter]["Total"] = []
+    for dataPeriod in MCDataPeriodes:
+        cutFlowPath = histoFiles[dataPeriod][data_set].replace(
             ".root", "-cutFlow.txt")
         rawCutFlow = open("../PlotFiles/"+cutFlowPath, "r")
-        cutFlow_content = rawCutFlow.read().split("\n")
-        for index, parameter in enumerate(cutParameters):
-            cutFlowValue = cutFlow_content[index].split("=")[1]
-            cutFlowHold[parameter].append(int(cutFlowValue))
+        rawCutFlow_content = rawCutFlow.read().split("\n")
+        for line in rawCutFlow_content:
+            if line[0][-9:-1] == "noFatJet":
+                continue
+            if line[0][0:4] == "real":
+                realCutFlow_content.append(line)
+            else:
+                cutFlow_content.append(line)
+
+        cutFlowExtraction(cutFlow_content, cutParameters, cutFlowHold)
+        cutFlowExtraction(realCutFlow_content,
+                          realCutParameters, realCutFlowHold)
         rawCutFlow.close()
-    cutFlowTotal = sum([sum(cutFlowHold[parameter])
-                        for parameter in cutParameters])
-    cutFlowValues = [str(sum(cutFlowHold[parameter]))
-                     for parameter in cutParameters]
-    cutFlowFile.write(
-        variable + "," + ",".join(cutFlowValues) + "," + str(cutFlowTotal) + "\n")
+
+    cutFlowInsertion(cutFlowFile, data_set, MCDataPeriodes,
+                     btagStrategies, cutParameters, cutFlowHold)
+    cutFlowInsertion(cutFlowFile, data_set, MCDataPeriodes,
+                     btagStrategies, cutParameters, cutFlowHold)
 
 cutFlowFile.close()
 
