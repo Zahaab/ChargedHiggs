@@ -16,7 +16,7 @@ do
             while [ $executeprocesses -gt 7 ]
             do
                 echo "8 processes running"
-                sleep 10m
+                sleep 1m
                 executeprocesses="$(pgrep execute -u ap17080 | wc -l)"
             done
         done

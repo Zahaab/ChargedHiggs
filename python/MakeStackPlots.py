@@ -148,8 +148,12 @@ def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters
                                        for i in cutHolder[parameter][btagStrategy]])
             rowValues.append(float(valueAllPeriods))
             rowData.append(str(valueAllPeriods))
-        file.write(",".join(rowData) + "," +
-                   str(sum(rowValues) - sum(total_events_list)) + "\n")
+        if Percent == "enable":
+            file.write(",".join(rowData) + "," +
+                       str(sum(rowValues) - sum(total_events_list)) + "\n")
+        else:
+            file.write(",".join(rowData) + "," +
+                       str(sum(rowValues) - total_events) + "\n")
     rowData = [data_set, "All_Data_Periods", "All_Tagging"]
     rowValues = []
     total_events = 0
@@ -171,8 +175,13 @@ def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters
                                    for i in cutHolder[parameter]["Total"]])
         rowValues.append(float(valueAllPeriods))
         rowData.append(str(valueAllPeriods))
-    file.write(",".join(rowData) + "," +
-               str(sum(rowValues) - sum(total_events_list)) + "\n")
+
+    if Percent == "enable":
+        file.write(",".join(rowData) + "," +
+                   str(sum(rowValues) - sum(total_events_list)) + "\n")
+    else:
+        file.write(",".join(rowData) + "," +
+                   str(sum(rowValues) - total_events) + "\n")
 
 
 cutFlowFile = open(outputdir + "/cutflow.txt", 'w')
