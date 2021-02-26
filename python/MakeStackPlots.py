@@ -44,94 +44,213 @@ realCutParameters = ["real"+i for i in cutParameters]
 def cutFlowExtraction(content, cutParameters, cutHolder):
     for index, parameter in enumerate(cutParameters):
         tagged_values = content[index].split("=")[1].split(",")
+        if tagged_values[-1] == "0":  # Some cut parameters don't cut anythign
+            for btagStrategy in btagStrategies:
+                cutHolder[parameter][btagStrategy].append("0")
+            cutHolder[parameter]["Total"].append("0")
+            continue
         for tagging, cutFlowValue in enumerate(tagged_values):
             if tagged_values[tagging] == tagged_values[-1]:
                 cutHolder[parameter]["Total"].append(cutFlowValue)
-                continue
-            cutHolder[parameter][btagStrategies[tagging]].append(cutFlowValue)
+            else:
+                cutHolder[parameter][btagStrategies[tagging]].append(
+                    cutFlowValue)
 
 
-def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters, cutHolder):
+def cutFlowPercentExtraction(content, cutParameters, cutHolder):
+    total_events = []
+    for index, parameter in enumerate(cutParameters):
+        tagged_values = content[index].split("=")[1].split(",")
+        if tagged_values[-1] == "0":  # Some cut parameters don't cut anythign
+            for btagStrategy in btagStrategies:
+                cutHolder[parameter][btagStrategy].append("0")
+            cutHolder[parameter]["Total"].append("0")
+            continue
+        if parameter[-11:] == "TotalEvents":
+            total_events = [float(i) for i in tagged_values]
+            for tagging, cutFlowValue in enumerate(tagged_values):
+                if tagged_values[tagging] == tagged_values[-1]:
+                    cutHolder[parameter]["Total"].append(cutFlowValue)
+                else:
+                    cutHolder[parameter][btagStrategies[tagging]].append(
+                        cutFlowValue)
+            continue
+        for tagging, cutFlowValue in enumerate(tagged_values):
+            if tagged_values[tagging] == tagged_values[-1]:
+                cutHolder[parameter]["Total"].append(
+                    str((float(cutFlowValue)/total_events[-1])*100))
+            else:
+                cutHolder[parameter][btagStrategies[tagging]].append(
+                    str((float(cutFlowValue)/total_events[tagging])*100))
+
+
+def sumPercent(total_list, percents):
+    flat_values = []
+    for index, total in enumerate(total_list):
+        if percents[index] == 0:
+            continue
+        flat_values.append(total*percents[index])
+    if flat_values == []:
+        return 0
+    else:
+        return (sum(flat_values)/sum(total_list))
+
+
+def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters, cutHolder, Percent="disable"):
     for periodindex, dataPeriod in enumerate(dataPeriodes):
         for btagStrategy in btagStrategies:
             rowData = [data_set, dataPeriod, btagStrategy]
             rowValues = []
+            total_events = 0
             for parameter in cutParameters:
+                if parameter[-11:] == "TotalEvents":
+                    total_events = float(
+                        cutHolder[parameter][btagStrategy][periodindex])
                 rowValues.append(
                     float(cutHolder[parameter][btagStrategy][periodindex]))
                 rowData.append(
                     str(cutHolder[parameter][btagStrategy][periodindex]))
-            file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+            file.write(",".join(rowData) + "," +
+                       str(sum(rowValues) - total_events) + "\n")
         rowData = [data_set, dataPeriod, "All_Tagging"]
         rowValues = []
+        total_events = 0
         for parameter in cutParameters:
+            if parameter[-11:] == "TotalEvents":
+                total_events = float(
+                    cutHolder[parameter]["Total"][periodindex])
             rowValues.append(
                 float(cutHolder[parameter]["Total"][periodindex]))
             rowData.append(
                 str(cutHolder[parameter]["Total"][periodindex]))
-        file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+        file.write(",".join(rowData) + "," +
+                   str(sum(rowValues) - total_events) + "\n")
     for btagStrategy in btagStrategies:
         rowData = [data_set, "All_Data_Periods", btagStrategy]
         rowValues = []
+        total_events = 0
+        total_events_list = []
         for parameter in cutParameters:
-            rowValues.append(float(sum(cutHolder[parameter][btagStrategy])))
-            rowData.append(str(sum(cutHolder[parameter][btagStrategy])))
-        file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+            if Percent == "enable":
+                if parameter[-11:] == "TotalEvents":
+                    total_events_list = [
+                        float(i) for i in cutHolder[parameter][btagStrategy]]
+                    valueAllPeriods = sum(
+                        [float(i) for i in cutHolder[parameter][btagStrategy]])
+                else:
+                    valueAllPeriods = sumPercent(total_events_list, [float(
+                        i) for i in cutHolder[parameter][btagStrategy]])
+            else:
+                if parameter[-11:] == "TotalEvents":
+                    total_events = sum([float(i)
+                                        for i in cutHolder[parameter][btagStrategy]])
+                valueAllPeriods = sum([float(i)
+                                       for i in cutHolder[parameter][btagStrategy]])
+            rowValues.append(float(valueAllPeriods))
+            rowData.append(str(valueAllPeriods))
+        file.write(",".join(rowData) + "," +
+                   str(sum(rowValues) - sum(total_events_list)) + "\n")
     rowData = [data_set, "All_Data_Periods", "All_Tagging"]
     rowValues = []
+    total_events = 0
     for parameter in cutParameters:
-        rowValues.append(float(sum(cutHolder[parameter]["Total"])))
-        rowData.append(str(sum(cutHolder[parameter]["Total"])))
-    file.write(",".join(rowData) + "," + str(sum(rowValues)) + "\n")
+        if Percent == "enable":
+            if parameter[-11:] == "TotalEvents":
+                total_events_list = [float(i)
+                                     for i in cutHolder[parameter]["Total"]]
+                valueAllPeriods = sum([float(i)
+                                       for i in cutHolder[parameter]["Total"]])
+            else:
+                valueAllPeriods = sumPercent(total_events_list, [float(
+                    i) for i in cutHolder[parameter]["Total"]])
+        else:
+            if parameter[-11:] == "TotalEvents":
+                total_events = sum([float(i)
+                                    for i in cutHolder[parameter]["Total"]])
+            valueAllPeriods = sum([float(i)
+                                   for i in cutHolder[parameter]["Total"]])
+        rowValues.append(float(valueAllPeriods))
+        rowData.append(str(valueAllPeriods))
+    file.write(",".join(rowData) + "," +
+               str(sum(rowValues) - sum(total_events_list)) + "\n")
 
 
 cutFlowFile = open(outputdir + "/cutflow.txt", 'w')
 cutFlowFile.truncate(0)  # to ensure the file is empty
-cutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags,"
+cutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," +
                   ",".join(cutParameters) + "," + "Total" + "\n")
 
 realCutFlowFile = open(outputdir + "/realcutflow.txt", 'w')
-realCutFlowFile.truncate(0)  # to ensure the file is empty
-realCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags,"
+realCutFlowFile.truncate(0)
+realCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," +
                       ",".join(realCutParameters) + "," + "Total" + "\n")
 
+cutFlowFilePercent = open(outputdir + "/cutflowPercent.txt", 'w')
+cutFlowFilePercent.truncate(0)
+cutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," +
+                         ",".join(cutParameters) + "," + "Total" + "\n")
+
+realCutFlowFilePercent = open(outputdir + "/realcutflowPercent.txt", 'w')
+realCutFlowFilePercent.truncate(0)
+realCutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," +
+                             ",".join(realCutParameters) + "," + "Total" + "\n")
+
 for data_set in plotEvents:  # Grabs the data sets
-    cutFlowHold = {}
     realCutFlowHold = {}
-    cutFlow_content = []
-    realCutFlow_content = []
+    cutFlowHold = {}
+    cutFlowHoldPercent = {}
+    realCutFlowHoldPercent = {}
     for parameter in cutParameters:
         cutFlowHold[parameter] = {}
         realCutFlowHold["real"+parameter] = {}
+        cutFlowHoldPercent[parameter] = {}
+        realCutFlowHoldPercent["real"+parameter] = {}
         for btagStrategy in btagStrategies:
             cutFlowHold[parameter][btagStrategy] = []
             realCutFlowHold["real"+parameter][btagStrategy] = []
+            cutFlowHoldPercent[parameter][btagStrategy] = []
+            realCutFlowHoldPercent["real"+parameter][btagStrategy] = []
         cutFlowHold[parameter]["Total"] = []
         realCutFlowHold["real"+parameter]["Total"] = []
+        cutFlowHoldPercent[parameter]["Total"] = []
+        realCutFlowHoldPercent["real"+parameter]["Total"] = []
     for dataPeriod in MCDataPeriodes:
+        cutFlow_content = []
+        realCutFlow_content = []
         cutFlowPath = histoFiles[dataPeriod][data_set].replace(
             ".root", "-cutFlow.txt")
         rawCutFlow = open("../PlotFiles/"+cutFlowPath, "r")
         rawCutFlow_content = rawCutFlow.read().split("\n")
         for line in rawCutFlow_content:
-            if line[0][-9:-1] == "noFatJet":
+            if line == rawCutFlow_content[-1] or line == rawCutFlow_content[-2]:
                 continue
-            if line[0][0:4] == "real":
+            if line[0:4] == "real":
                 realCutFlow_content.append(line)
             else:
                 cutFlow_content.append(line)
-
         cutFlowExtraction(cutFlow_content, cutParameters, cutFlowHold)
+
         cutFlowExtraction(realCutFlow_content,
                           realCutParameters, realCutFlowHold)
+        cutFlowPercentExtraction(
+            cutFlow_content, cutParameters, cutFlowHoldPercent)
+        cutFlowPercentExtraction(realCutFlow_content,
+                                 realCutParameters, realCutFlowHoldPercent)
         rawCutFlow.close()
 
     cutFlowInsertion(cutFlowFile, data_set, MCDataPeriodes,
                      btagStrategies, cutParameters, cutFlowHold)
-    cutFlowInsertion(cutFlowFile, data_set, MCDataPeriodes,
-                     btagStrategies, cutParameters, cutFlowHold)
+    cutFlowInsertion(realCutFlowFile, data_set, MCDataPeriodes,
+                     btagStrategies, realCutParameters, realCutFlowHold)
+    cutFlowInsertion(cutFlowFilePercent, data_set, MCDataPeriodes,
+                     btagStrategies, cutParameters, cutFlowHoldPercent, "enable")
+    cutFlowInsertion(realCutFlowFilePercent, data_set, MCDataPeriodes,
+                     btagStrategies, realCutParameters, realCutFlowHoldPercent, "enable")
 
 cutFlowFile.close()
+realCutFlowFile.close()
+cutFlowFilePercent.close()
+realCutFlowFilePercent.close()
 
 # THIS IS WHERE THE ACCEPTANCE IS HANDELED
 
@@ -269,7 +388,6 @@ for HistoName in histoNames:
                     h_sig_Hplus_m400list.append(h_sig_Hplus_m400e)
 
                 h_sig_Hplus_m400 = sumHistosList(h_sig_Hplus_m400list)
-                print(h_sig_Hplus_m400)
                 h_sig_Hplus_m400.SetLineColor(kBlack)
                 h_sig_Hplus_m400.SetLineStyle(7)
                 if ReBin == True:
