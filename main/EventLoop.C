@@ -340,7 +340,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
 {
     bool status_W = false;
     bool status = false;
-    if (Lepton_Charge < 0.)
+    if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
     {
         if (Higgs.Pt() < jet0_ptv)
         {
@@ -369,7 +369,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
         }
         status = true;
     }
-    else if (Lepton_Charge > 0.)
+    else if (Lepton_Charge > 0. && FJets.size() == 1)
     {
         Higgs = FJets.at(0);
         Wplus = GetWBoson(status_W);
@@ -396,10 +396,20 @@ void EventLoop::SetJetPair()
 {
     if (FJets.size() < 1)
     {
-        m_noJets.twoTags++;
-        m_noJets.weightedTwoTags = m_noJets.weightedTwoTags + std::abs(EventWeight);
-        m_NTags = m_NTags_trkJ;
-        return;
+        if (jjbb == true)
+        {
+            m_noJets.jjbb_twoTags++;
+            m_noJets.jjbb_weightedTwoTags = m_noJets.jjbb_weightedTwoTags + std::abs(EventWeight);
+            m_NTags = m_NTags_trkJ;
+            return;
+        }
+        else
+        {
+            m_noJets.lvbb_twoTags++;
+            m_noJets.lvbb_weightedTwoTags = m_noJets.lvbb_weightedTwoTags + std::abs(EventWeight);
+            m_NTags = m_NTags_trkJ;
+            return;
+        }
     }
 
     if (FJets.size() == 1)
@@ -584,29 +594,127 @@ void EventLoop::Set_Jet_observables()
 
 void EventLoop::CutFlowAssignment(CutFlowType &cutVariable)
 {
-    if (m_NTags == 2)
+    if (jjbb == true)
     {
-        cutVariable.twoTags++;
-        cutVariable.weightedTwoTags = cutVariable.weightedTwoTags + std::abs(EventWeight);
+        if (m_NTags == 2)
+        {
+            cutVariable.jjbb_twoTags++;
+            cutVariable.jjbb_weightedTwoTags = cutVariable.jjbb_weightedTwoTags + std::abs(EventWeight);
+        }
+        else if (m_NTags == 3)
+        {
+            cutVariable.jjbb_threeTags++;
+            cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + std::abs(EventWeight);
+        }
+        else if (m_NTags == 4)
+        {
+            cutVariable.jjbb_fourPlusTags++;
+            cutVariable.jjbb_weightedFourPlusTags = cutVariable.jjbb_weightedFourPlusTags + std::abs(EventWeight);
+        }
     }
-    else if (m_NTags == 3)
+    else
     {
-        cutVariable.threeTags++;
-        cutVariable.weightedThreeTags = cutVariable.weightedThreeTags + std::abs(EventWeight);
+        if (m_NTags == 2)
+        {
+            cutVariable.lvbb_twoTags++;
+            cutVariable.lvbb_weightedTwoTags = cutVariable.lvbb_weightedTwoTags + std::abs(EventWeight);
+        }
+        else if (m_NTags == 3)
+        {
+            cutVariable.lvbb_threeTags++;
+            cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + std::abs(EventWeight);
+        }
+        else if (m_NTags == 4)
+        {
+            cutVariable.lvbb_fourPlusTags++;
+            cutVariable.lvbb_weightedFourPlusTags = cutVariable.lvbb_weightedFourPlusTags + std::abs(EventWeight);
+        }
     }
-    else if (m_NTags == 4)
+}
+
+void EventLoop::altCutFlow(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
+                           Float_t hw_angle, Float_t solo_jet_ptv)
+{
+    bool status_W = false;
+    if (MET->Pt() < met_ptv && Lepton4vector->Pt() < lep_ptv || Wplus.Pt() < jet1_ptv)
     {
-        cutVariable.fourPlusTags++;
-        cutVariable.weightedFourPlusTags = cutVariable.weightedFourPlusTags + std::abs(EventWeight);
+        CutFlowAssignment(m_ChannelFlexCutFlow);
+        return;
+    }
+    if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
+    {
+        if (Higgs.Pt() < jet0_ptv)
+        {
+            CutFlowAssignment(m_HiggsPtAltCutFlow);
+            return;
+        }
+        if (Wplus.Pt() < jet1_ptv)
+        {
+            CutFlowAssignment(m_WplusPtAltCutFlow);
+            return;
+        }
+        if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
+        {
+            CutFlowAssignment(m_Higgs_LeptonAngleAltCutflow);
+            return;
+        }
+        if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
+        {
+            CutFlowAssignment(m_Wplus_LeptonAngleAltCutflow);
+            return;
+        }
+        if (m_DeltaPhi_HW < hw_angle)
+        {
+            CutFlowAssignment(m_Higgs_WplusAngleAltCutflow);
+            return;
+        }
+    }
+    else if (Lepton_Charge > 0. && FJets.size() == 1)
+    {
+        Higgs = FJets.at(0);
+        Wplus = GetWBoson(status_W);
+        if (!status_W)
+        {
+            CutFlowAssignment(m_PositiveLepWAltCutflow);
+            return;
+        }
+        if (Higgs.Pt() < solo_jet_ptv)
+        {
+            CutFlowAssignment(m_PositiveLepHiggsPtAltCutFlow);
+            return;
+        }
     }
 }
 
 bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                                           Float_t hw_angle, Float_t solo_jet_ptv)
 {
+    if (Lepton_Charge < 0)
+    {
+        jjbb = true; //Hadronic channel
+    }
+    else
+    {
+        jjbb = false; //Leptonic channel
+    }
+
     SetJetPair();
 
     CutFlowAssignment(m_TotalEvents);
+
+    if (Lepton_Charge < 0 && FJets.size() < 2)
+    {
+        CutFlowAssignment(m_HadronicCutFlow);
+        return false;
+    }
+    if (Lepton_Charge > 0 && FJets.size() < 1)
+    {
+        CutFlowAssignment(m_LeptonicCutFlow);
+        return false;
+    }
+
+    altCutFlow(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
+               hw_angle, solo_jet_ptv);
 
     if (MET->Pt() < met_ptv)
     {
@@ -616,16 +724,6 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
     if (Lepton4vector->Pt() < lep_ptv)
     {
         CutFlowAssignment(m_LeptonPtCutFlow);
-        return false;
-    }
-    if (Lepton_Charge < 0 && FJets.size() < 2)
-    {
-        CutFlowAssignment(m_HadronicCutFlow);
-        return false;
-    }
-    if (Lepton_Charge > 0 && FJets.size() < 1)
-    {
-        CutFlowAssignment(m_LeptonicCutFlow);
         return false;
     }
 
