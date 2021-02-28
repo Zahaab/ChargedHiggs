@@ -338,7 +338,6 @@ public:
    //Below is the alternate cutflow
    CutFlowType m_ChannelFlexCutFlow;
    CutFlowType m_HiggsPtAltCutFlow;
-   CutFlowType m_WplusPtAltCutFlow;
    CutFlowType m_Higgs_LeptonAngleAltCutflow;
    CutFlowType m_Wplus_LeptonAngleAltCutflow;
    CutFlowType m_Higgs_WplusAngleAltCutflow;
@@ -553,7 +552,6 @@ EventLoop::~EventLoop()
    CutFlowParser(m_cutFlowFileStreamAlt, m_LeptonicCutFlow, "Leptonic_rejected");
    CutFlowParser(m_cutFlowFileStreamAlt, m_ChannelFlexCutFlow, "jjbb_OR_lvbb_rejected");
    CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsPtAltCutFlow, "Higgs_momentum");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_WplusPtAltCutFlow, "Wboson_momentum");
    CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_LeptonAngleAltCutflow, "Higgs_Lepton_Angle");
    CutFlowParser(m_cutFlowFileStreamAlt, m_Wplus_LeptonAngleAltCutflow, "Wboson_Lepton_Angle");
    CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_WplusAngleAltCutflow, "Higgs_Wboson_Angle");

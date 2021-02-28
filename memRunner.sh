@@ -13,7 +13,7 @@ do
             echo "Begining to process" $config
             nice -n 1 nohup sh -c "./execute $config" &
             executeprocesses="$(pgrep execute -u ap17080 | wc -l)"
-            while [ $executeprocesses -gt 7 ]
+            while [ $executeprocesses -gt 5 ]
             do
                 echo "8 processes running"
                 sleep 1m

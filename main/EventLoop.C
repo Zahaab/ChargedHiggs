@@ -648,11 +648,6 @@ void EventLoop::altCutFlow(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, F
             CutFlowAssignment(m_HiggsPtAltCutFlow);
             return;
         }
-        if (Wplus.Pt() < jet1_ptv)
-        {
-            CutFlowAssignment(m_WplusPtAltCutFlow);
-            return;
-        }
         if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
         {
             CutFlowAssignment(m_Higgs_LeptonAngleAltCutflow);

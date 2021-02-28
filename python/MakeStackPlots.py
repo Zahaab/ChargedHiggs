@@ -34,11 +34,17 @@ else:
 
 # THIS IS WHERE THE ACCEPTANCE IS HANDELED
 
-cutParameters = ["TotalEvents", "MET", "Lepton_momentum", "Hadronic_rejected", "Leptonic_rejected", "Higgs_momentum",
+cutParameters = ["TotalEvents", "Hadronic_rejected", "Leptonic_rejected", "MET", "Lepton_momentum", "Higgs_momentum",
                  "Wboson_momentum", "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
                  "PositiveLep_Higgs_bool", "Higgs_Mass", "Wplus_Mass"]
 
 realCutParameters = ["real"+i for i in cutParameters]
+
+altcutParameters = ["TotalEvents", "Hadronic_rejected", "Leptonic_rejected", "jjbb_OR_lvbb_rejected", "Higgs_momentum",
+                    "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
+                    "PositiveLep_Higgs_bool", "Higgs_Mass", "Wplus_Mass"]
+
+altrealCutParameters = ["real"+i for i in altcutParameters]
 
 
 def prepareCutHolder(cutHolder, cutParameters, btagStrategies):
@@ -207,45 +213,45 @@ def cutFlowInsertion(file, data_set, dataPeriodes, btagStrategies, cutParameters
 
 cutFlowFile = open(outputdir + "/cutflow.txt", 'w')
 cutFlowFile.truncate(0)  # to ensure the file is empty
-cutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
+cutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
                   ",".join(cutParameters) + "," + "Total" + "\n")
 
 realCutFlowFile = open(outputdir + "/realcutflow.txt", 'w')
 realCutFlowFile.truncate(0)
-realCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
+realCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
                       ",".join(realCutParameters) + "," + "Total" + "\n")
 
 cutFlowFilePercent = open(outputdir + "/cutflowPercent.txt", 'w')
 cutFlowFilePercent.truncate(0)
-cutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
+cutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
                          ",".join(cutParameters) + "," + "Total" + "\n")
 
 realCutFlowFilePercent = open(outputdir + "/realcutflowPercent.txt", 'w')
 realCutFlowFilePercent.truncate(0)
-realCutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
+realCutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
                              ",".join(realCutParameters) + "," + "Total" + "\n")
 
 # vvvvv THIS IS FOR THE ALTERNATE CUT FLOW vvvvvv
 
 altcutFlowFile = open(outputdir + "/altcutflow.txt", 'w')
 altcutFlowFile.truncate(0)  # to ensure the file is empty
-altcutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
-                     ",".join(cutParameters) + "," + "Total" + "\n")
+altcutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
+                     ",".join(altcutParameters) + "," + "Total" + "\n")
 
 altrealCutFlowFile = open(outputdir + "/altrealcutflow.txt", 'w')
 altrealCutFlowFile.truncate(0)
-altrealCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
-                         ",".join(realCutParameters) + "," + "Total" + "\n")
+altrealCutFlowFile.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
+                         ",".join(altrealCutParameters) + "," + "Total" + "\n")
 
 altcutFlowFilePercent = open(outputdir + "/altcutflowpercent.txt", 'w')
 altcutFlowFilePercent.truncate(0)
-altcutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
-                            ",".join(cutParameters) + "," + "Total" + "\n")
+altcutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
+                            ",".join(altcutParameters) + "," + "Total" + "\n")
 
 altrealCutFlowFilePercent = open(outputdir + "/altrealcutflowpercent.txt", 'w')
 altrealCutFlowFilePercent.truncate(0)
-altrealCutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel" +
-                                ",".join(realCutParameters) + "," + "Total" + "\n")
+altrealCutFlowFilePercent.write("Data-Set,"+"Data_Period," + "Number_of_Tags," + "Channel," +
+                                ",".join(altrealCutParameters) + "," + "Total" + "\n")
 
 # ^^^^^^ THIS IS FOR THE ALTERNATE CUT FLOW ^^^^^
 
@@ -267,13 +273,13 @@ for data_set in plotEvents:  # Grabs the data sets
     altcutFlowHoldPercent = {}
     altrealCutFlowHoldPercent = {}
     altcutFlowHold = prepareCutHolder(
-        altcutFlowHold, cutParameters, btagStrategies)
+        altcutFlowHold, altcutParameters, btagStrategies)
     altrealCutFlowHold = prepareCutHolder(
-        altrealCutFlowHold, realCutParameters, btagStrategies)
+        altrealCutFlowHold, altrealCutParameters, btagStrategies)
     altcutFlowHoldPercent = prepareCutHolder(
-        altcutFlowHoldPercent, cutParameters, btagStrategies)
+        altcutFlowHoldPercent, altcutParameters, btagStrategies)
     altrealCutFlowHoldPercent = prepareCutHolder(
-        altrealCutFlowHoldPercent, realCutParameters, btagStrategies)
+        altrealCutFlowHoldPercent, altrealCutParameters, btagStrategies)
 
     for dataPeriod in MCDataPeriodes:
         cutFlow_content = []
@@ -291,7 +297,9 @@ for data_set in plotEvents:  # Grabs the data sets
         altrawCutFlow_content = altrawCutFlow.read().split("\n")
 
         for line in rawCutFlow_content:
-            if line == rawCutFlow_content[-1] or line == rawCutFlow_content[-2]:
+            if line == "":
+                continue
+            if line.split("=")[0][-9:-1] == "noFatJets":
                 continue
             if line[0:4] == "real":
                 realCutFlow_content.append(line)
@@ -299,7 +307,9 @@ for data_set in plotEvents:  # Grabs the data sets
                 cutFlow_content.append(line)
 
         for line in altrawCutFlow_content:
-            if line == altrawCutFlow_content[-1] or line == altrawCutFlow_content[-2]:
+            if line == "":
+                continue
+            if line.split("=")[0][-9:-1] == "noFatJet":
                 continue
             if line[0:4] == "real":
                 altrealCutFlow_content.append(line)
@@ -314,13 +324,13 @@ for data_set in plotEvents:  # Grabs the data sets
         cutFlowPercentExtraction(realCutFlow_content,
                                  realCutParameters, realCutFlowHoldPercent)
 
-        cutFlowExtraction(altcutFlow_content, cutParameters, altcutFlowHold)
+        cutFlowExtraction(altcutFlow_content, altcutParameters, altcutFlowHold)
         cutFlowExtraction(altrealCutFlow_content,
-                          realCutParameters, altrealCutFlowHold)
+                          altrealCutParameters, altrealCutFlowHold)
         cutFlowPercentExtraction(
-            altcutFlow_content, cutParameters, altcutFlowHoldPercent)
+            altcutFlow_content, altcutParameters, altcutFlowHoldPercent)
         cutFlowPercentExtraction(altrealCutFlow_content,
-                                 realCutParameters, altrealCutFlowHoldPercent)
+                                 altrealCutParameters, altrealCutFlowHoldPercent)
         rawCutFlow.close()
         altrawCutFlow.close()
 
@@ -333,13 +343,13 @@ for data_set in plotEvents:  # Grabs the data sets
     cutFlowInsertion(realCutFlowFilePercent, data_set, MCDataPeriodes,
                      btagStrategies, realCutParameters, realCutFlowHoldPercent, "enable")
     cutFlowInsertion(altcutFlowFile, data_set, MCDataPeriodes,
-                     btagStrategies, cutParameters, altcutFlowHold)
+                     btagStrategies, altcutParameters, altcutFlowHold)
     cutFlowInsertion(altrealCutFlowFile, data_set, MCDataPeriodes,
-                     btagStrategies, realCutParameters, altrealCutFlowHold)
+                     btagStrategies, altrealCutParameters, altrealCutFlowHold)
     cutFlowInsertion(altcutFlowFilePercent, data_set, MCDataPeriodes,
-                     btagStrategies, cutParameters, altcutFlowHoldPercent, "enable")
+                     btagStrategies, altcutParameters, altcutFlowHoldPercent, "enable")
     cutFlowInsertion(altrealCutFlowFilePercent, data_set, MCDataPeriodes,
-                     btagStrategies, realCutParameters, altrealCutFlowHoldPercent, "enable")
+                     btagStrategies, altrealCutParameters, altrealCutFlowHoldPercent, "enable")
 
 cutFlowFile.close()
 realCutFlowFile.close()
