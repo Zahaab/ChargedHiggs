@@ -688,7 +688,6 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
     if (Lepton_Charge < 0)
     {
         jjbb = true; //Hadronic Channel
-        return false;
     }
     else
     {
