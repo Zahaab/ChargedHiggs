@@ -71,6 +71,7 @@ void EventLoop::Loop()
                 if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
                 {
                     pass_sel["Merged_LepP_CR"] = true;
+                    std::cout << "THIS IS THE HIGGS MASS: " << Higgs.M() * 0.001 << "\n";
                     CutFlowAssignment(m_HiggsMassCutFlow);
                 }
             }
@@ -686,11 +687,12 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
 {
     if (Lepton_Charge < 0)
     {
-        jjbb = true; //Hadronic channel
+        jjbb = true; //Hadronic Channel
+        return false;
     }
     else
     {
-        jjbb = false; //Leptonic channel
+        jjbb = false; //Leptonic Channel
     }
 
     SetJetPair();

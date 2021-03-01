@@ -454,7 +454,7 @@ for HistoName in histoNames:
     leg_pl1, leg_pl2, leg_pl3, leg_pl4 = legend_place
     test_pl1, test_pl2 = text_place
 
-    for Region in ["Merged_LepN_SR"]:
+    for Region in ["Merged_LepP_SR", "Merged_LepN_SR"]:
         significanceValues = []
         for btagStrategy in btagStrategies:
             ReBin = False
@@ -467,6 +467,7 @@ for HistoName in histoNames:
             escale = 1.61419497
             h_other_background_list = []
             h_ttbar_background = []
+            print histoFiles
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 h_sig_Hplus_m400list = []
                 if config["Stack_MC16a"] == "Enable":
@@ -849,37 +850,51 @@ for HistoName in histoNames:
 
             nbins = 20
             ymax = 0
+            xmax = 0
             # NormalizeHisto(h_other_background)
             if h_other_background_list != []:
                 if ymax < h_other_background.GetMaximum():
                     ymax = h_other_background.GetMaximum()
+                if xmax < h_other_background.GetMaximum():
+                    xmax = h_other_background.GetMaximum()
             # NormalizeHisto(h_all_background)
             if h_all_background != 0:
                 if ymax < h_all_background.GetMaximum():
                     ymax = h_all_background.GetMaximum()
+                if xmax < h_all_background.GetMaximum():
+                    xmax = h_all_background.GetMaximum()
 
             if config["Plot_ttbar"] == "Enable" or config["Plot_ttbarSherpa"] == "Enable":
                 # NormalizeHisto(h_ttbar_background)
                 if ymax < h_ttbar_background.GetMaximum():
                     ymax = h_ttbar_background.GetMaximum()
+                if xmax < h_ttbar_background.GetMaximum():
+                    xmax = h_ttbar_background.GetMaximum()
 
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m400)
                 if ymax < h_sig_Hplus_m400.GetMaximum():
                     ymax = h_sig_Hplus_m400.GetMaximum()
+                if xmax < h_sig_Hplus_m400.GetMaximum():
+                    xmax = h_sig_Hplus_m400.GetMaximum()
             if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m800)
                 if ymax < h_sig_Hplus_m800.GetMaximum():
                     ymax = h_sig_Hplus_m800.GetMaximum()
+                if xmax < h_sig_Hplus_m800.GetMaximum():
+                    xmax = h_sig_Hplus_m800.GetMaximum()
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m1600)
                 if ymax < h_sig_Hplus_m1600.GetMaximum():
                     ymax = h_sig_Hplus_m1600.GetMaximum()
+                if xmax < h_sig_Hplus_m1600.GetMaximum():
+                    xmax = h_sig_Hplus_m1600.GetMaximum()
 
             if h_all_background != 0:
                 h_all_background.SetNdivisions(8)
                 h_all_background.SetXTitle(Xaxis_label)
                 h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_all_background.GetXaxis().SetRangeUser(0.001, 700)
                 h_all_background.Draw("HIST")
                 if h_other_background_list != []:
                     h_other_background.Draw("HISTSAME")
@@ -893,6 +908,7 @@ for HistoName in histoNames:
                 h_other_background.SetNdivisions(8)
                 h_other_background.SetXTitle(Xaxis_label)
                 h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_other_background.GetXaxis().SetRangeUser(0.001, 700)
                 h_other_background.Draw("HIST")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400n.Draw("HISTSAME")
@@ -904,6 +920,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m400.SetNdivisions(8)
                 h_sig_Hplus_m400.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m400.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m400.GetXaxis().SetRangeUser(0.001, 700)
                 h_sig_Hplus_m400.Draw("HIST")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                     h_sig_Hplus_m800n.Draw("HISTSAME")
@@ -913,6 +930,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m800.SetNdivisions(8)
                 h_sig_Hplus_m800.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m800.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m800.GetXaxis().SetRangeUser(0.001, 700)
                 h_sig_Hplus_m800.Draw("HIST")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                     h_sig_Hplus_m1600n.Draw("HISTSAME")
@@ -920,6 +938,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m1600.SetNdivisions(8)
                 h_sig_Hplus_m1600.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m1600.GetYaxis().SetRangeUser(0.001, ymax*1.5)
+                h_sig_Hplus_m1600.GetXaxis().SetRangeUser(0.001, 700)
                 h_sig_Hplus_m1600.Draw("HIST")
 
             leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)

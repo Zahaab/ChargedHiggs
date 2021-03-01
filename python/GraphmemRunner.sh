@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 FILES=/home/ap17080/Thesis/ChargedHiggs/mainConfigFiles/*
 for configFolder in $FILES
