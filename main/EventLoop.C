@@ -72,7 +72,7 @@ void EventLoop::Loop()
                 {
                     pass_sel["Merged_LepP_CR"] = true;
                     std::cout << "THIS IS THE HIGGS MASS: " << Higgs.M() * 0.001 << "\n";
-                    CutFlowAssignment(m_HiggsMassCutFlow);
+                    CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
                 }
             }
             else if (Lepton_Charge < 0)
@@ -83,11 +83,11 @@ void EventLoop::Loop()
                     pass_sel["Merged_LepN_CR"] = true;
                 if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub)))
                 {
-                    CutFlowAssignment(m_HiggsMassCutFlow);
+                    CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
                 }
                 if (!((Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
                 {
-                    CutFlowAssignment(m_WplusMassCutFlow);
+                    CutFlowAssignment(m_WplusMassCutFlow, flatCutFlow, realCutFlow);
                 }
             }
         }
@@ -345,27 +345,27 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
     {
         if (Higgs.Pt() < jet0_ptv)
         {
-            CutFlowAssignment(m_HiggsPtCutFlow);
+            CutFlowAssignment(m_HiggsPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
         if (Wplus.Pt() < jet1_ptv)
         {
-            CutFlowAssignment(m_WplusPtCutFlow);
+            CutFlowAssignment(m_WplusPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
         if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
         {
-            CutFlowAssignment(m_Higgs_LeptonAngleCutflow);
+            CutFlowAssignment(m_Higgs_LeptonAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
         if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
         {
-            CutFlowAssignment(m_Wplus_LeptonAngleCutflow);
+            CutFlowAssignment(m_Wplus_LeptonAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
         if (m_DeltaPhi_HW < hw_angle)
         {
-            CutFlowAssignment(m_Higgs_WplusAngleCutflow);
+            CutFlowAssignment(m_Higgs_WplusAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
         status = true;
@@ -376,12 +376,12 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
         Wplus = GetWBoson(status_W);
         if (!status_W)
         {
-            CutFlowAssignment(m_PositiveLepWCutflow);
+            CutFlowAssignment(m_PositiveLepWCutflow, flatCutFlow, realCutFlow);
             return status;
         }
         if (Higgs.Pt() < solo_jet_ptv)
         {
-            CutFlowAssignment(m_PositiveLepHiggsPtCutFlow);
+            CutFlowAssignment(m_PositiveLepHiggsPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
         status = true;
@@ -593,42 +593,81 @@ void EventLoop::Set_Jet_observables()
     }
 }
 
-void EventLoop::CutFlowAssignment(CutFlowType &cutVariable)
+void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, bool XrealCutFlow)
 {
-    if (jjbb == true)
+    if (XflatCutFlow == true || XrealCutFlow == true)
     {
-        if (m_NTags == 2)
+        if (jjbb == true)
         {
-            cutVariable.jjbb_twoTags++;
-            cutVariable.jjbb_weightedTwoTags = cutVariable.jjbb_weightedTwoTags + std::abs(EventWeight);
+            if (m_NTags == 2)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.jjbb_twoTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.jjbb_weightedTwoTags = cutVariable.jjbb_weightedTwoTags + std::abs(EventWeight);
+                }
+            }
+            else if (m_NTags == 3)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.jjbb_threeTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + std::abs(EventWeight);
+                }
+            }
+            else if (m_NTags == 4)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.jjbb_fourPlusTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.jjbb_weightedFourPlusTags = cutVariable.jjbb_weightedFourPlusTags + std::abs(EventWeight);
+                }
+            }
         }
-        else if (m_NTags == 3)
+        else
         {
-            cutVariable.jjbb_threeTags++;
-            cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + std::abs(EventWeight);
-        }
-        else if (m_NTags == 4)
-        {
-            cutVariable.jjbb_fourPlusTags++;
-            cutVariable.jjbb_weightedFourPlusTags = cutVariable.jjbb_weightedFourPlusTags + std::abs(EventWeight);
-        }
-    }
-    else
-    {
-        if (m_NTags == 2)
-        {
-            cutVariable.lvbb_twoTags++;
-            cutVariable.lvbb_weightedTwoTags = cutVariable.lvbb_weightedTwoTags + std::abs(EventWeight);
-        }
-        else if (m_NTags == 3)
-        {
-            cutVariable.lvbb_threeTags++;
-            cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + std::abs(EventWeight);
-        }
-        else if (m_NTags == 4)
-        {
-            cutVariable.lvbb_fourPlusTags++;
-            cutVariable.lvbb_weightedFourPlusTags = cutVariable.lvbb_weightedFourPlusTags + std::abs(EventWeight);
+            if (m_NTags == 2)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.lvbb_twoTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.lvbb_weightedTwoTags = cutVariable.lvbb_weightedTwoTags + std::abs(EventWeight);
+                }
+            }
+            else if (m_NTags == 3)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.lvbb_threeTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + std::abs(EventWeight);
+                }
+            }
+            else if (m_NTags == 4)
+            {
+                if (XflatCutFlow == true)
+                {
+                    cutVariable.lvbb_fourPlusTags++;
+                }
+                if (XrealCutFlow == true)
+                {
+                    cutVariable.lvbb_weightedFourPlusTags = cutVariable.lvbb_weightedFourPlusTags + std::abs(EventWeight);
+                }
+            }
         }
     }
 }
@@ -636,48 +675,51 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable)
 void EventLoop::altCutFlow(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                            Float_t hw_angle, Float_t solo_jet_ptv)
 {
-    bool status_W = false;
-    if (MET->Pt() < met_ptv && Lepton4vector->Pt() < lep_ptv || Wplus.Pt() < jet1_ptv)
+    if (flatAltCutFlow == true || realAltCutFlow == true)
     {
-        CutFlowAssignment(m_ChannelFlexCutFlow);
-        return;
-    }
-    if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
-    {
-        if (Higgs.Pt() < jet0_ptv)
+        bool status_W = false;
+        if (MET->Pt() < met_ptv || Lepton4vector->Pt() < lep_ptv && Wplus.Pt() < jet1_ptv)
         {
-            CutFlowAssignment(m_HiggsPtAltCutFlow);
+            CutFlowAssignment(m_ChannelFlexCutFlow, flatAltCutFlow, realAltCutFlow);
             return;
         }
-        if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
+        if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
         {
-            CutFlowAssignment(m_Higgs_LeptonAngleAltCutflow);
-            return;
+            if (Higgs.Pt() < jet0_ptv)
+            {
+                CutFlowAssignment(m_HiggsPtAltCutFlow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
+            if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
+            {
+                CutFlowAssignment(m_Higgs_LeptonAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
+            if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
+            {
+                CutFlowAssignment(m_Wplus_LeptonAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
+            if (m_DeltaPhi_HW < hw_angle)
+            {
+                CutFlowAssignment(m_Higgs_WplusAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
         }
-        if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
+        else if (Lepton_Charge > 0. && FJets.size() == 1)
         {
-            CutFlowAssignment(m_Wplus_LeptonAngleAltCutflow);
-            return;
-        }
-        if (m_DeltaPhi_HW < hw_angle)
-        {
-            CutFlowAssignment(m_Higgs_WplusAngleAltCutflow);
-            return;
-        }
-    }
-    else if (Lepton_Charge > 0. && FJets.size() == 1)
-    {
-        Higgs = FJets.at(0);
-        Wplus = GetWBoson(status_W);
-        if (!status_W)
-        {
-            CutFlowAssignment(m_PositiveLepWAltCutflow);
-            return;
-        }
-        if (Higgs.Pt() < solo_jet_ptv)
-        {
-            CutFlowAssignment(m_PositiveLepHiggsPtAltCutFlow);
-            return;
+            Higgs = FJets.at(0);
+            Wplus = GetWBoson(status_W);
+            if (!status_W)
+            {
+                CutFlowAssignment(m_PositiveLepWAltCutflow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
+            if (Higgs.Pt() < solo_jet_ptv)
+            {
+                CutFlowAssignment(m_PositiveLepHiggsPtAltCutFlow, flatAltCutFlow, realAltCutFlow);
+                return;
+            }
         }
     }
 }
@@ -696,16 +738,16 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
 
     SetJetPair();
 
-    CutFlowAssignment(m_TotalEvents);
+    CutFlowAssignment(m_TotalEvents, flatCutFlow, realCutFlow);
 
     if (Lepton_Charge < 0 && FJets.size() < 2)
     {
-        CutFlowAssignment(m_HadronicCutFlow);
+        CutFlowAssignment(m_HadronicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
     if (Lepton_Charge > 0 && FJets.size() < 1)
     {
-        CutFlowAssignment(m_LeptonicCutFlow);
+        CutFlowAssignment(m_LeptonicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
 
@@ -714,12 +756,12 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
 
     if (MET->Pt() < met_ptv)
     {
-        CutFlowAssignment(m_METCutFlow);
+        CutFlowAssignment(m_METCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
     if (Lepton4vector->Pt() < lep_ptv)
     {
-        CutFlowAssignment(m_LeptonPtCutFlow);
+        CutFlowAssignment(m_LeptonPtCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
 

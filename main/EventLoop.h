@@ -114,8 +114,10 @@ public:
    TBranch *b_TrackJet_M;            //!
    TBranch *b_TrackJet_btagWeight;   //!
 
-   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", int EventReadout = 0, Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70.,
-             Float_t wmub = 100., Float_t met_ptv = 30000., Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
+   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", int EventReadout = 0,
+             bool flatCutFlow = true, bool realCutFlow = true, bool flatAltCutFlow = false, bool realAltCutFlow = false,
+             Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70., Float_t wmub = 100., Float_t met_ptv = 30000.,
+             Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
              Float_t lep_jet1_angle = 1.0, Float_t hw_angle = 2.5, Float_t solo_jet_ptv = 250000.);
 
    EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileName, std::unordered_map<std::string, std::string> config);
@@ -273,6 +275,10 @@ public:
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
    int EventReadout = 0;
+   bool flatCutFlow = true;
+   bool realCutFlow = true;
+   bool flatAltCutFlow = false;
+   bool realAltCutFlow = false;
 
    //cutflow of config parameters
    ofstream m_cutFlowFileStream;
@@ -318,8 +324,8 @@ public:
 
    void altCutFlow(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                    Float_t hw_angle, Float_t solo_jet_ptv);
-   void CutFlowAssignment(CutFlowType &cutVariable);
-   void CutFlowParser(ofstream &File, const CutFlowType &cutVariable, const std::string cutName);
+   void CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, bool XrealCutFlow);
+   void CutFlowParser(ofstream &File, const CutFlowType &cutVariable, const std::string cutName, bool XflatCutFlow, bool XrealCutFlow);
    CutFlowType m_TotalEvents;
    CutFlowType m_noJets;
    CutFlowType m_HadronicCutFlow;
@@ -411,6 +417,50 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
    {
       EventReadout = std::stoi(config["EventReadout"]);
    }
+   if (config["FlatCutFlow"] != "")
+   {
+      if (config["FlatCutFlow"] == "Enable" || config["FlatCutFlow"] == "enable")
+      {
+         flatCutFlow = true;
+      }
+      else
+      {
+         flatCutFlow = false;
+      }
+   }
+   if (config["RealCutFlow"] != "")
+   {
+      if (config["RealCutFlow"] == "Enable" || config["RealCutFlow"] == "enable")
+      {
+         realCutFlow = true;
+      }
+      else
+      {
+         realcutFlow = false;
+      }
+   }
+   if (config["FlatAlternateCutFlow"] != "")
+   {
+      if (config["FlatAlternateCutFlow"] == "Enable" || config["FlatAlternateCutFlow"] == "enable")
+      {
+         flatAltCutFlow = true;
+      }
+      else
+      {
+         flatAltCutFlow = false;
+      }
+   }
+   if (config["RealAlternateCutFlow"] != "")
+   {
+      if (config["RealAlternateCutFlow"] == "Enable" || config["RealAlternateCutFlow"] == "enable")
+      {
+         realAltCutFlow = true;
+      }
+      else
+      {
+         realAltCutFlow = false;
+      }
+   }
    if (config["SampleName"] == "")
    {
       throw std::runtime_error(std::string("Error: No SampleName given"));
@@ -455,21 +505,22 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
    Init(tree, SampleName, ExpUncertaintyName);
 }
 
-EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, int EventReadout, Float_t hmlb, Float_t hmub, Float_t wmlb, Float_t wmub,
-                     Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
-                     Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
-                                                               hmlb(hmlb),
-                                                               hmub(hmub),
-                                                               wmlb(wmlb),
-                                                               wmub(wmub),
-                                                               met_ptv(met_ptv),
-                                                               lep_ptv(lep_ptv),
-                                                               jet0_ptv(jet0_ptv),
-                                                               jet1_ptv(jet1_ptv),
-                                                               lep_jet0_angle(lep_jet0_angle),
-                                                               lep_jet1_angle(lep_jet1_angle),
-                                                               hw_angle(hw_angle),
-                                                               solo_jet_ptv(solo_jet_ptv)
+EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, int EventReadout, bool flatCutFlow,
+                     bool realCutFlow, bool flatAltCutFlow, bool realAltCutFlow, Float_t hmlb, Float_t hmub, Float_t wmlb,
+                     Float_t wmub, Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle,
+                     Float_t lep_jet1_angle, Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
+                                                                                       hmlb(hmlb),
+                                                                                       hmub(hmub),
+                                                                                       wmlb(wmlb),
+                                                                                       wmub(wmub),
+                                                                                       met_ptv(met_ptv),
+                                                                                       lep_ptv(lep_ptv),
+                                                                                       jet0_ptv(jet0_ptv),
+                                                                                       jet1_ptv(jet1_ptv),
+                                                                                       lep_jet0_angle(lep_jet0_angle),
+                                                                                       lep_jet1_angle(lep_jet1_angle),
+                                                                                       hw_angle(hw_angle),
+                                                                                       solo_jet_ptv(solo_jet_ptv)
 {
 
    // if parameter tree is not specified (or zero), connect the file
@@ -510,61 +561,85 @@ EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName
    Init(tree, sampleName, ExpUncertaintyName);
 }
 
-void EventLoop::CutFlowParser(ofstream &File, const CutFlowType &cutVariable, const std::string cutName)
+void EventLoop::CutFlowParser(ofstream &File, const CutFlowType &cutVariable, const std::string cutName, bool XflatCutFlow, bool XrealCutFlow)
 {
-   File << cutName << "=" << cutVariable.jjbb_twoTags << "," << cutVariable.jjbb_threeTags << ","
-        << cutVariable.jjbb_fourPlusTags << "," << cutVariable.jjbb_Total() << "|" << cutVariable.lvbb_twoTags
-        << "," << cutVariable.lvbb_threeTags << "," << cutVariable.lvbb_fourPlusTags << ","
-        << cutVariable.lvbb_Total() << "\n"
-        << "real" << cutName << "=" << cutVariable.jjbb_weightedTwoTags << "," << cutVariable.jjbb_weightedThreeTags
-        << "," << cutVariable.jjbb_weightedFourPlusTags << "," << cutVariable.jjbb_WeightedTotal() << "|"
-        << cutVariable.lvbb_weightedTwoTags << "," << cutVariable.lvbb_weightedThreeTags << ","
-        << cutVariable.lvbb_weightedFourPlusTags << "," << cutVariable.lvbb_WeightedTotal() << "\n";
+   if (XflatCutFlow == true)
+   {
+      File << cutName << "=" << cutVariable.jjbb_twoTags << "," << cutVariable.jjbb_threeTags << ","
+           << cutVariable.jjbb_fourPlusTags << "," << cutVariable.jjbb_Total() << "|" << cutVariable.lvbb_twoTags
+           << "," << cutVariable.lvbb_threeTags << "," << cutVariable.lvbb_fourPlusTags << ","
+           << cutVariable.lvbb_Total() << "\n"
+   }
+   if (XrealCutFlow == true)
+   {
+      File << "real" << cutName << "=" << cutVariable.jjbb_weightedTwoTags << "," << cutVariable.jjbb_weightedThreeTags
+           << "," << cutVariable.jjbb_weightedFourPlusTags << "," << cutVariable.jjbb_WeightedTotal() << "|"
+           << cutVariable.lvbb_weightedTwoTags << "," << cutVariable.lvbb_weightedThreeTags << ","
+           << cutVariable.lvbb_weightedFourPlusTags << "," << cutVariable.lvbb_WeightedTotal() << "\n";
+   }
 }
 
 EventLoop::~EventLoop()
 {
-   m_cutFlowFileStream.open(m_cutFlowFileName);
-   CutFlowParser(m_cutFlowFileStream, m_TotalEvents, "TotalEvents");
-   CutFlowParser(m_cutFlowFileStream, m_HadronicCutFlow, "Hadronic_rejected");
-   CutFlowParser(m_cutFlowFileStream, m_LeptonicCutFlow, "Leptonic_rejected");
-   CutFlowParser(m_cutFlowFileStream, m_METCutFlow, "MET");
-   CutFlowParser(m_cutFlowFileStream, m_LeptonPtCutFlow, "Lepton_momentum");
-   CutFlowParser(m_cutFlowFileStream, m_HiggsPtCutFlow, "Higgs_momentum");
-   CutFlowParser(m_cutFlowFileStream, m_WplusPtCutFlow, "Wboson_momentum");
-   CutFlowParser(m_cutFlowFileStream, m_Higgs_LeptonAngleCutflow, "Higgs_Lepton_Angle");
-   CutFlowParser(m_cutFlowFileStream, m_Wplus_LeptonAngleCutflow, "Wboson_Lepton_Angle");
-   CutFlowParser(m_cutFlowFileStream, m_Higgs_WplusAngleCutflow, "Higgs_Wboson_Angle");
-   CutFlowParser(m_cutFlowFileStream, m_PositiveLepWCutflow, "PositiveLep_Wboson_bool");
-   CutFlowParser(m_cutFlowFileStream, m_PositiveLepHiggsPtCutFlow, "PositiveLep_Higgs_momentum");
-   CutFlowParser(m_cutFlowFileStream, m_HiggsMassCutFlow, "Higgs_Mass");
-   CutFlowParser(m_cutFlowFileStream, m_WplusMassCutFlow, "Wplus_Mass");
-   m_cutFlowFileStream << "noFatJets"
-                       << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
-                       << "real"
-                       << "noFatJets"
-                       << "=" << m_noJets.jjbb_WeightedTotal() << "," << m_noJets.lvbb_WeightedTotal() << "\n";
-   m_cutFlowFileStream.close();
+   if (flatCutFlow == true || realCutFlow == true)
+   {
+      m_cutFlowFileStream.open(m_cutFlowFileName);
+      CutFlowParser(m_cutFlowFileStream, m_TotalEvents, "TotalEvents", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_HadronicCutFlow, "Hadronic_rejected", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_LeptonicCutFlow, "Leptonic_rejected", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_METCutFlow, "MET", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_LeptonPtCutFlow, "Lepton_momentum", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_HiggsPtCutFlow, "Higgs_momentum", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_WplusPtCutFlow, "Wboson_momentum", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_Higgs_LeptonAngleCutflow, "Higgs_Lepton_Angle", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_Wplus_LeptonAngleCutflow, "Wboson_Lepton_Angle", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_Higgs_WplusAngleCutflow, "Higgs_Wboson_Angle", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_PositiveLepWCutflow, "PositiveLep_Wboson_bool", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_PositiveLepHiggsPtCutFlow, "PositiveLep_Higgs_momentum", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_HiggsMassCutFlow, "Higgs_Mass", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_WplusMassCutFlow, "Wplus_Mass", flatCutFlow, realCutFlow);
+      if (flatCutFlow == true)
+      {
+         m_cutFlowFileStream << "noFatJets"
+                             << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
+      }
+      if (realCutFlow == true)
+      {
+         m_cutFlowFileStream << "real"
+                             << "noFatJets"
+                             << "=" << m_noJets.jjbb_WeightedTotal() << "," << m_noJets.lvbb_WeightedTotal() << "\n";
+      }
+      m_cutFlowFileStream.close();
+   }
 
-   m_cutFlowFileStreamAlt.open(m_cutFlowFileNameAlt);
-   CutFlowParser(m_cutFlowFileStreamAlt, m_TotalEvents, "TotalEvents");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_HadronicCutFlow, "Hadronic_rejected");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_LeptonicCutFlow, "Leptonic_rejected");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_ChannelFlexCutFlow, "jjbb_OR_lvbb_rejected");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsPtAltCutFlow, "Higgs_momentum");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_LeptonAngleAltCutflow, "Higgs_Lepton_Angle");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_Wplus_LeptonAngleAltCutflow, "Wboson_Lepton_Angle");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_WplusAngleAltCutflow, "Higgs_Wboson_Angle");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepWAltCutflow, "PositiveLep_Wboson_bool");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepHiggsPtAltCutFlow, "PositiveLep_Higgs_momentum");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsMassAltCutFlow, "Higgs_Mass");
-   CutFlowParser(m_cutFlowFileStreamAlt, m_WplusMassAltCutFlow, "Wplus_Mass");
-   m_cutFlowFileStreamAlt << "noFatJets"
-                          << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
-                          << "real"
-                          << "noFatJets"
-                          << "=" << m_noJets.jjbb_WeightedTotal() << "," << m_noJets.lvbb_WeightedTotal() << "\n";
-   m_cutFlowFileStreamAlt.close();
+   if (flatAltCutFlow == true || realAltCutFlow == true)
+   {
+      m_cutFlowFileStreamAlt.open(m_cutFlowFileNameAlt);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_TotalEvents, "TotalEvents", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_HadronicCutFlow, "Hadronic_rejected", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_LeptonicCutFlow, "Leptonic_rejected", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_ChannelFlexCutFlow, "jjbb_OR_lvbb_rejected", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsPtAltCutFlow, "Higgs_momentum", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_LeptonAngleAltCutflow, "Higgs_Lepton_Angle", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_Wplus_LeptonAngleAltCutflow, "Wboson_Lepton_Angle", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_WplusAngleAltCutflow, "Higgs_Wboson_Angle", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepWAltCutflow, "PositiveLep_Wboson_bool", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepHiggsPtAltCutFlow, "PositiveLep_Higgs_momentum", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsMassAltCutFlow, "Higgs_Mass", flatAltCutFlow, realAltCutFlow);
+      CutFlowParser(m_cutFlowFileStreamAlt, m_WplusMassAltCutFlow, "Wplus_Mass", flatAltCutFlow, realAltCutFlow);
+      if (flatAltCutFlow == true)
+      {
+         m_cutFlowFileStreamAlt << "noFatJets"
+                                << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
+      }
+      if (realAltCutFlow == true)
+      {
+         m_cutFlowFileStreamAlt << "real"
+                                << "noFatJets"
+                                << "=" << m_noJets.jjbb_WeightedTotal() << "," << m_noJets.lvbb_WeightedTotal() << "\n";
+      }
+      m_cutFlowFileStreamAlt.close();
+   }
 
    if (!fChain)
       return;
