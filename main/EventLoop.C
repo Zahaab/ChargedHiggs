@@ -419,26 +419,48 @@ void EventLoop::SetJetPair()
         return;
     }
 
-    Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-    Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-    m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
-    m_NTags_Wplus = FJets.at(0).M() < FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+    // Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+    // Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
+    // m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+    // m_NTags_Wplus = FJets.at(0).M() < FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
+    const double_t higgsMass = 125100;
+    const double_t wplusMass = 80379;
+    Higgs = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Impossibly big so gets reassigned
+    Wplus = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Hopefully
+    int indexWplus = 0;
+    int indexHiggs = 0;
 
-    for (int i = 2; i < FJets.size(); i++)
+    for (int i = 0; i < FJets.size(); i++)
     {
-        if (Higgs.M() < FJets.at(i).M())
+
+        if (abs(higgsMass - FJets.at(i).M()) < abs(higgsMass - Higgs.M()) &&
+            abs(wplusMass - FJets.at(i).M()) > abs(higgsMass - FJets.at(i).M()))
         {
-            Wplus = Higgs;
-            m_NTags_Wplus = m_NTags_Higgs;
+            if (abs(wplusMass - higgs.M()) < abs(wplusMass - Wplus.M()))
+            {
+                Wplus = Higgs;
+                indexWplus = indexHiggs;
+            }
+
             Higgs = FJets.at(i);
-            m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(i);
+            indexHiggs = i;
         }
-        else if (Wplus.M() < FJets.at(i).M())
+
+        if (abs(wplusMass - FJets.at(i).M()) < abs(wplusMass - Wplus.M()) &&
+            abs(wplusMass - FJets.at(i).M()) < abs(higgsMass - FJets.at(i).M()))
         {
+            if (abs(higgsMass - Wplus.M()) < abs(higgsMass - Higgs.M()))
+            {
+                Higgs = Wplus;
+                indexHiggs = indexWplus;
+            }
             Wplus = FJets.at(i);
-            m_NTags_Wplus = nTaggedVRTrkJetsInFJet.at(i);
+            indexWplus = i;
         }
     }
+    m_NTags_Higgs = nTaggedVRTrkJetsInFJet.at(indexHiggs);
+    m_NTags_Wplus = nTaggedVRTrkJetsInFJet.at(indexWplus);
+
     m_ntagsOutside = m_NTags_trkJ - (m_NTags_Higgs + m_NTags_Wplus);
     m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
     m_NTags = GetBTagCategoryShort(m_NTags_Higgs, m_ntagsOutside);
