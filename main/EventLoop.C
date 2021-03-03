@@ -425,7 +425,7 @@ void EventLoop::SetJetPair()
     // m_NTags_Wplus = FJets.at(0).M() < FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
     const double_t higgsMass = 125100;
     const double_t wplusMass = 80379;
-    Higgs = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Impossibly big so gets reassigned
+    Higgs = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Impossibly big so it gets reassigned
     Wplus = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Hopefully
     int indexWplus = 0;
     int indexHiggs = 0;
@@ -436,7 +436,7 @@ void EventLoop::SetJetPair()
         if (abs(higgsMass - FJets.at(i).M()) < abs(higgsMass - Higgs.M()) &&
             abs(wplusMass - FJets.at(i).M()) > abs(higgsMass - FJets.at(i).M()))
         {
-            if (abs(wplusMass - higgs.M()) < abs(wplusMass - Wplus.M()))
+            if (abs(wplusMass - Higgs.M()) < abs(wplusMass - Wplus.M()))
             {
                 Wplus = Higgs;
                 indexWplus = indexHiggs;

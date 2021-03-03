@@ -436,7 +436,7 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
       }
       else
       {
-         realcutFlow = false;
+         realCutFlow = false;
       }
    }
    if (config["FlatAlternateCutFlow"] != "")
@@ -568,7 +568,7 @@ void EventLoop::CutFlowParser(ofstream &File, const CutFlowType &cutVariable, co
       File << cutName << "=" << cutVariable.jjbb_twoTags << "," << cutVariable.jjbb_threeTags << ","
            << cutVariable.jjbb_fourPlusTags << "," << cutVariable.jjbb_Total() << "|" << cutVariable.lvbb_twoTags
            << "," << cutVariable.lvbb_threeTags << "," << cutVariable.lvbb_fourPlusTags << ","
-           << cutVariable.lvbb_Total() << "\n"
+           << cutVariable.lvbb_Total() << "\n";
    }
    if (XrealCutFlow == true)
    {
@@ -601,7 +601,7 @@ EventLoop::~EventLoop()
       if (flatCutFlow == true)
       {
          m_cutFlowFileStream << "noFatJets"
-                             << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
+                             << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n";
       }
       if (realCutFlow == true)
       {
@@ -630,7 +630,7 @@ EventLoop::~EventLoop()
       if (flatAltCutFlow == true)
       {
          m_cutFlowFileStreamAlt << "noFatJets"
-                                << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n"
+                                << "=" << m_noJets.jjbb_Total() << "," << m_noJets.lvbb_Total() << "\n";
       }
       if (realAltCutFlow == true)
       {
