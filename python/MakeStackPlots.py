@@ -73,7 +73,7 @@ if config["CSV_RealCutFlowPercent"] == "Enable":
                                  ",".join(realCutParameters) + "," + "Total" + "\n")
 
 # vvvvv THIS IS FOR THE ALTERNATE CUT FLOW vvvvvv
-if config["CSV_AlternateCutFlow "] == "Enable":
+if config["CSV_AlternateCutFlow"] == "Enable":
     if config["CSV_FlatCutFlow"] == "Enable":
         altcutFlowFile = open(outputdir + "/altcutflow.txt", 'w')
         altcutFlowFile.truncate(0)  # to ensure the file is empty
@@ -100,7 +100,7 @@ if config["CSV_AlternateCutFlow "] == "Enable":
                                         ",".join(altrealCutParameters) + "," + "Total" + "\n")
 
 # ^^^^^^ THIS IS FOR THE ALTERNATE CUT FLOW ^^^^^
-if config["CSV_FlatCutFlow"] != "Enable" and config["CSV_RealCutFlow"] != "Enable" and config["CSV_FlatCutFlowPercent"] != "Enable" and config["CSV_RealCutFlowPercent"] != "Enable":
+if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable" or config["CSV_FlatCutFlowPercent"] == "Enable" or config["CSV_RealCutFlowPercent"] == "Enable":
     for data_set in plotEvents:  # Grabs the data sets
         if config["CSV_FlatCutFlow"] == "Enable":
             cutFlowHold = {}
@@ -119,7 +119,7 @@ if config["CSV_FlatCutFlow"] != "Enable" and config["CSV_RealCutFlow"] != "Enabl
             realCutFlowHoldPercent = prepareCutHolder(
                 realCutFlowHoldPercent, realCutParameters, btagStrategies)
 
-        if config["CSV_AlternateCutFlow "] == "Enable":
+        if config["CSV_AlternateCutFlow"] == "Enable":
             if config["CSV_FlatCutFlow"] == "Enable":
                 altcutFlowHold = {}
                 altcutFlowHold = prepareCutHolder(
@@ -182,10 +182,10 @@ if config["CSV_FlatCutFlow"] != "Enable" and config["CSV_RealCutFlow"] != "Enabl
                 cutFlowPercentExtraction(
                     cutFlow_content, cutParameters, btagStrategies, cutFlowHoldPercent)
             if config["CSV_RealCutFlowPercent"] == "Enable":
-            cutFlowPercentExtraction(realCutFlow_content,
-                                     realCutParameters, btagStrategies, realCutFlowHoldPercent)
+                cutFlowPercentExtraction(realCutFlow_content,
+                                         realCutParameters, btagStrategies, realCutFlowHoldPercent)
 
-            if config["CSV_AlternateCutFlow "] == "Enable":
+            if config["CSV_AlternateCutFlow"] == "Enable":
                 if config["CSV_FlatCutFlow"] == "Enable":
                     cutFlowExtraction(altcutFlow_content,
                                       altcutParameters, btagStrategies, altcutFlowHold)
@@ -213,7 +213,7 @@ if config["CSV_FlatCutFlow"] != "Enable" and config["CSV_RealCutFlow"] != "Enabl
         if config["CSV_RealCutFlowPercent"] == "Enable":
             cutFlowInsertion(realCutFlowFilePercent, data_set, MCDataPeriodes,
                              btagStrategies, realCutParameters, realCutFlowHoldPercent, "enable")
-        if config["CSV_AlternateCutFlow "] == "Enable":
+        if config["CSV_AlternateCutFlow"] == "Enable":
             if config["CSV_FlatCutFlow"] == "Enable":
                 cutFlowInsertion(altcutFlowFile, data_set, MCDataPeriodes,
                                  btagStrategies, altcutParameters, altcutFlowHold)
@@ -236,7 +236,7 @@ if config["CSV_FlatCutFlow"] != "Enable" and config["CSV_RealCutFlow"] != "Enabl
     if config["CSV_RealCutFlowPercent"] == "Enable":
         realCutFlowFilePercent.close()
 
-    if config["CSV_AlternateCutFlow "] == "Enable":
+    if config["CSV_AlternateCutFlow"] == "Enable":
         if config["CSV_FlatCutFlow"] == "Enable":
             altcutFlowFile.close()
         if config["CSV_RealCutFlow"] == "Enable":
@@ -352,7 +352,6 @@ for HistoName in histoNames:
             escale = 1.61419497
             h_other_background_list = []
             h_ttbar_background = []
-            print histoFiles
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 h_sig_Hplus_m400list = []
                 if config["Stack_MC16a"] == "Enable":
