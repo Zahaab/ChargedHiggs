@@ -330,10 +330,8 @@ public:
    CutFlowType m_noJets;
    CutFlowType m_HadronicCutFlow;
    CutFlowType m_LeptonicCutFlow;
-   CutFlowType m_METCutFlow;
-   CutFlowType m_LeptonPtCutFlow;
+   CutFlowType m_ChannelFlexCutFlow;
    CutFlowType m_HiggsPtCutFlow;
-   CutFlowType m_WplusPtCutFlow;
    CutFlowType m_Higgs_LeptonAngleCutflow;
    CutFlowType m_Wplus_LeptonAngleCutflow;
    CutFlowType m_Higgs_WplusAngleCutflow;
@@ -341,16 +339,6 @@ public:
    CutFlowType m_PositiveLepHiggsPtCutFlow;
    CutFlowType m_HiggsMassCutFlow;
    CutFlowType m_WplusMassCutFlow;
-   //Below is the alternate cutflow
-   CutFlowType m_ChannelFlexCutFlow;
-   CutFlowType m_HiggsPtAltCutFlow;
-   CutFlowType m_Higgs_LeptonAngleAltCutflow;
-   CutFlowType m_Wplus_LeptonAngleAltCutflow;
-   CutFlowType m_Higgs_WplusAngleAltCutflow;
-   CutFlowType m_PositiveLepWAltCutflow;
-   CutFlowType m_PositiveLepHiggsPtAltCutFlow;
-   CutFlowType m_HiggsMassAltCutFlow;
-   CutFlowType m_WplusMassAltCutFlow;
 };
 
 #endif
@@ -587,10 +575,8 @@ EventLoop::~EventLoop()
       CutFlowParser(m_cutFlowFileStream, m_TotalEvents, "TotalEvents", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_HadronicCutFlow, "Hadronic_rejected", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_LeptonicCutFlow, "Leptonic_rejected", flatCutFlow, realCutFlow);
-      CutFlowParser(m_cutFlowFileStream, m_METCutFlow, "MET", flatCutFlow, realCutFlow);
-      CutFlowParser(m_cutFlowFileStream, m_LeptonPtCutFlow, "Lepton_momentum", flatCutFlow, realCutFlow);
+      CutFlowParser(m_cutFlowFileStream, m_ChannelFlexCutFlow, "jjbb_OR_lvbb_rejected", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_HiggsPtCutFlow, "Higgs_momentum", flatCutFlow, realCutFlow);
-      CutFlowParser(m_cutFlowFileStream, m_WplusPtCutFlow, "Wboson_momentum", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_Higgs_LeptonAngleCutflow, "Higgs_Lepton_Angle", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_Wplus_LeptonAngleCutflow, "Wboson_Lepton_Angle", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_Higgs_WplusAngleCutflow, "Higgs_Wboson_Angle", flatCutFlow, realCutFlow);
@@ -612,21 +598,9 @@ EventLoop::~EventLoop()
       m_cutFlowFileStream.close();
    }
 
-   if (flatAltCutFlow == true || realAltCutFlow == true)
+   if (flatAltCutFlow == true || realAltCutFlow == true) //This is a place for the alternate cutflow file
    {
       m_cutFlowFileStreamAlt.open(m_cutFlowFileNameAlt);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_TotalEvents, "TotalEvents", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_HadronicCutFlow, "Hadronic_rejected", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_LeptonicCutFlow, "Leptonic_rejected", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_ChannelFlexCutFlow, "jjbb_OR_lvbb_rejected", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsPtAltCutFlow, "Higgs_momentum", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_LeptonAngleAltCutflow, "Higgs_Lepton_Angle", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_Wplus_LeptonAngleAltCutflow, "Wboson_Lepton_Angle", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_Higgs_WplusAngleAltCutflow, "Higgs_Wboson_Angle", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepWAltCutflow, "PositiveLep_Wboson_bool", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_PositiveLepHiggsPtAltCutFlow, "PositiveLep_Higgs_momentum", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_HiggsMassAltCutFlow, "Higgs_Mass", flatAltCutFlow, realAltCutFlow);
-      CutFlowParser(m_cutFlowFileStreamAlt, m_WplusMassAltCutFlow, "Wplus_Mass", flatAltCutFlow, realAltCutFlow);
       if (flatAltCutFlow == true)
       {
          m_cutFlowFileStreamAlt << "noFatJets"

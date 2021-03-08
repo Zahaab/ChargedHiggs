@@ -36,15 +36,15 @@ else:
 
 # THIS IS WHERE THE ACCEPTANCE IS HANDELED
 
-cutParameters = ["TotalEvents", "Hadronic_rejected", "Leptonic_rejected", "MET", "Lepton_momentum", "Higgs_momentum",
-                 "Wboson_momentum", "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
-                 "PositiveLep_Higgs_bool", "Higgs_Mass", "Wplus_Mass"]
+cutParameters = ["TotalEvents", "Hadronic_rejected", "Leptonic_rejected", "jjbb_OR_lvbb_rejected", "Higgs_momentum",
+                 "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
+                 "PositiveLep_Higgs_momentum", "Higgs_Mass", "Wplus_Mass"]
 
 realCutParameters = ["real"+i for i in cutParameters]
 
 altcutParameters = ["TotalEvents", "Hadronic_rejected", "Leptonic_rejected", "jjbb_OR_lvbb_rejected", "Higgs_momentum",
                     "Higgs_Lepton_Angle", "Wboson_Lepton_Angle", "Higgs_Wboson_Angle", "PositiveLep_Wboson_bool",
-                    "PositiveLep_Higgs_bool", "Higgs_Mass", "Wplus_Mass"]
+                    "PositiveLep_Higgs_momentum", "Higgs_Mass", "Wplus_Mass"]
 
 altrealCutParameters = ["real"+i for i in altcutParameters]
 
@@ -140,18 +140,12 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
         for dataPeriod in MCDataPeriodes:
             cutFlow_content = []
             realCutFlow_content = []
+            altcutFlow_content = []
+            altrealCutFlow_content = []
             cutFlowPath = histoFiles[dataPeriod][data_set].replace(
                 ".root", "-cutFlow.txt")
             rawCutFlow = open("../PlotFiles/"+cutFlowPath, "r")
             rawCutFlow_content = rawCutFlow.read().split("\n")
-
-            altcutFlow_content = []
-            altrealCutFlow_content = []
-            altcutFlowPath = histoFiles[dataPeriod][data_set].replace(
-                ".root", "-cutFlowAlt.txt")
-            altrawCutFlow = open("../PlotFiles/"+altcutFlowPath, "r")
-            altrawCutFlow_content = altrawCutFlow.read().split("\n")
-
             for line in rawCutFlow_content:
                 if line == "":
                     continue
@@ -162,15 +156,21 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
                 else:
                     cutFlow_content.append(line)
 
-            for line in altrawCutFlow_content:
-                if line == "":
-                    continue
-                if line.split("=")[0][-9:-1] == "noFatJet":
-                    continue
-                if line[0:4] == "real":
-                    altrealCutFlow_content.append(line)
-                else:
-                    altcutFlow_content.append(line)
+            if config["CSV_AlternateCutFlow"] == "Enable":
+                altcutFlowPath = histoFiles[dataPeriod][data_set].replace(
+                    ".root", "-cutFlowAlt.txt")
+                altrawCutFlow = open("../PlotFiles/"+altcutFlowPath, "r")
+                altrawCutFlow_content = altrawCutFlow.read().split("\n")
+
+                for line in altrawCutFlow_content:
+                    if line == "":
+                        continue
+                    if line.split("=")[0][-9:-1] == "noFatJet":
+                        continue
+                    if line[0:4] == "real":
+                        altrealCutFlow_content.append(line)
+                    else:
+                        altcutFlow_content.append(line)
 
             if config["CSV_FlatCutFlow"] == "Enable":
                 cutFlowExtraction(cutFlow_content, cutParameters,
@@ -199,7 +199,8 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
                     cutFlowPercentExtraction(altrealCutFlow_content,
                                              altrealCutParameters, btagStrategies, altrealCutFlowHoldPercent)
             rawCutFlow.close()
-            altrawCutFlow.close()
+            if config["CSV_AlternateCutFlow"] == "Enable":
+                altrawCutFlow.close()
 
         if config["CSV_FlatCutFlow"] == "Enable":
             cutFlowInsertion(cutFlowFile, data_set, MCDataPeriodes,

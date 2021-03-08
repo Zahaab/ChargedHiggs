@@ -71,7 +71,6 @@ void EventLoop::Loop()
                 if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
                 {
                     pass_sel["Merged_LepP_CR"] = true;
-                    std::cout << "THIS IS THE HIGGS MASS: " << Higgs.M() * 0.001 << "\n";
                     CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
                 }
             }
@@ -348,11 +347,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
             CutFlowAssignment(m_HiggsPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
-        if (Wplus.Pt() < jet1_ptv)
-        {
-            CutFlowAssignment(m_WplusPtCutFlow, flatCutFlow, realCutFlow);
-            return status;
-        }
+
         if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
         {
             CutFlowAssignment(m_Higgs_LeptonAngleCutflow, flatCutFlow, realCutFlow);
@@ -697,53 +692,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
 void EventLoop::altCutFlow(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                            Float_t hw_angle, Float_t solo_jet_ptv)
 {
-    if (flatAltCutFlow == true || realAltCutFlow == true)
-    {
-        bool status_W = false;
-        if (MET->Pt() < met_ptv || Lepton4vector->Pt() < lep_ptv && Wplus.Pt() < jet1_ptv)
-        {
-            CutFlowAssignment(m_ChannelFlexCutFlow, flatAltCutFlow, realAltCutFlow);
-            return;
-        }
-        if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
-        {
-            if (Higgs.Pt() < jet0_ptv)
-            {
-                CutFlowAssignment(m_HiggsPtAltCutFlow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-            if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
-            {
-                CutFlowAssignment(m_Higgs_LeptonAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-            if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
-            {
-                CutFlowAssignment(m_Wplus_LeptonAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-            if (m_DeltaPhi_HW < hw_angle)
-            {
-                CutFlowAssignment(m_Higgs_WplusAngleAltCutflow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-        }
-        else if (Lepton_Charge > 0. && FJets.size() == 1)
-        {
-            Higgs = FJets.at(0);
-            Wplus = GetWBoson(status_W);
-            if (!status_W)
-            {
-                CutFlowAssignment(m_PositiveLepWAltCutflow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-            if (Higgs.Pt() < solo_jet_ptv)
-            {
-                CutFlowAssignment(m_PositiveLepHiggsPtAltCutFlow, flatAltCutFlow, realAltCutFlow);
-                return;
-            }
-        }
-    }
+    return; //This is a place for testing alternate event selection methods
 }
 
 bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
@@ -776,14 +725,9 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
     altCutFlow(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
                hw_angle, solo_jet_ptv);
 
-    if (MET->Pt() < met_ptv)
+    if (MET->Pt() < met_ptv || Lepton4vector->Pt() < lep_ptv && Wplus.Pt() < jet1_ptv)
     {
-        CutFlowAssignment(m_METCutFlow, flatCutFlow, realCutFlow);
-        return false;
-    }
-    if (Lepton4vector->Pt() < lep_ptv)
-    {
-        CutFlowAssignment(m_LeptonPtCutFlow, flatCutFlow, realCutFlow);
+        CutFlowAssignment(m_ChannelFlexCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
 
