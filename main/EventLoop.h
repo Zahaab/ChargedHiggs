@@ -253,6 +253,9 @@ public:
    float m_btagCut_value_CaloJets;
    float m_pTH_over_mvH;
    float m_ptW_over_mvH;
+   //tests
+   Int_t bins;
+   Double_t integral;
    // Higgs and W mass bounds
    Float_t hmlb = 90.;
    Float_t hmub = 140.;
@@ -275,7 +278,8 @@ public:
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
    int EventReadout = 0;
-   Float_t testTally = 0.0;
+   Float_t testTally1 = 0.0;
+   Float_t testTally2 = 0.0;
    bool flatCutFlow = true;
    bool realCutFlow = true;
    bool flatAltCutFlow = false;
@@ -572,7 +576,8 @@ EventLoop::~EventLoop()
 {
    if (flatCutFlow == true || realCutFlow == true)
    {
-      std::cout << testTally << "\n";
+      std::cout << "These are the events that pass into the histograms" << testTally1 << "\n"
+                << "These are the events that are written into the histograms" << testTally2 << "\n";
       m_cutFlowFileStream.open(m_cutFlowFileName);
       CutFlowParser(m_cutFlowFileStream, m_TotalEvents, "TotalEvents", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_HadronicCutFlow, "Hadronic_rejected", flatCutFlow, realCutFlow);

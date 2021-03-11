@@ -30,6 +30,24 @@ void EventLoop::Loop()
                 std::cout << "Processing " << jentry << " events!!!" << std::endl;
             }
         }
+
+        map<TString, std::vector<TH1F *>> local = h_mH->GetTwoTagHistos();
+        // integral =
+        for (auto const &x : local)
+        {
+            std::cout << "\n"
+                      << x.first << ": ";
+            for (auto const i : x.second)
+            {
+                std::cout << i->Integral(-1, 30, "") << " ";
+            }
+            std::cout << "\n";
+        }
+
+        // std::cout << "These are the events that pass into the histograms : " << testTally1 << "\n"
+        //           << "These are the events that are written into the histograms : " << testTally2 << "\n"
+        //           << "These are the events that are integrated : " << internal << "\n";
+
         for (auto sel : mySel)
         {
             pass_sel[sel] = false;
@@ -121,7 +139,7 @@ void EventLoop::Loop()
 
         if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
         {
-            testTally = testTally + EventWeight;
+            testTally1 = testTally1 + EventWeight;
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
             h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
@@ -870,6 +888,7 @@ void EventLoop ::Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *
 
 void EventLoop::Write(TDirectory *dir, std::string dirname)
 {
+    testTally2 = testTally2 + EventWeight;
     h_MET->Write(dir, ("MET"));
     h_METSig->Write(dir, ("METSig"));
     h_MinDeltaPhiJETMET->Write(dir, ("MinDeltaPhiJETMET"));
