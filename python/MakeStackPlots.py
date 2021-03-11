@@ -733,47 +733,36 @@ for HistoName in histoNames:
                 h_other_background.SetLineColor(1)
                 h_other_background.SetFillColor(kRed-3)
 
-            nbins = 20
+            #nbins = 20
             ymax = 0
-            xmax = 0
             # NormalizeHisto(h_other_background)
             if h_other_background_list != []:
                 if ymax < h_other_background.GetMaximum():
                     ymax = h_other_background.GetMaximum()
-                if xmax < h_other_background.GetMaximum():
-                    xmax = h_other_background.GetMaximum()
             # NormalizeHisto(h_all_background)
             if h_all_background != 0:
                 if ymax < h_all_background.GetMaximum():
                     ymax = h_all_background.GetMaximum()
-                if xmax < h_all_background.GetMaximum():
-                    xmax = h_all_background.GetMaximum()
 
             if config["Plot_ttbar"] == "Enable" or config["Plot_ttbarSherpa"] == "Enable":
                 # NormalizeHisto(h_ttbar_background)
                 if ymax < h_ttbar_background.GetMaximum():
                     ymax = h_ttbar_background.GetMaximum()
-                if xmax < h_ttbar_background.GetMaximum():
-                    xmax = h_ttbar_background.GetMaximum()
 
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m400)
                 if ymax < h_sig_Hplus_m400.GetMaximum():
                     ymax = h_sig_Hplus_m400.GetMaximum()
-                if xmax < h_sig_Hplus_m400.GetMaximum():
-                    xmax = h_sig_Hplus_m400.GetMaximum()
+
             if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m800)
                 if ymax < h_sig_Hplus_m800.GetMaximum():
                     ymax = h_sig_Hplus_m800.GetMaximum()
-                if xmax < h_sig_Hplus_m800.GetMaximum():
-                    xmax = h_sig_Hplus_m800.GetMaximum()
+
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 # NormalizeHisto(h_sig_Hplus_m1600)
                 if ymax < h_sig_Hplus_m1600.GetMaximum():
                     ymax = h_sig_Hplus_m1600.GetMaximum()
-                if xmax < h_sig_Hplus_m1600.GetMaximum():
-                    xmax = h_sig_Hplus_m1600.GetMaximum()
 
             if h_all_background != 0:
                 h_all_background.SetNdivisions(8)
@@ -853,7 +842,7 @@ for HistoName in histoNames:
             c1.RedrawAxis()
             c1.Update()
             c1.RedrawAxis()
-            c1.SaveAs(histoDir + "/ShapePlot_%s_lvbb.pdf" %
+            c1.SaveAs(histoDir + "/ShapePlot_%s.pdf" %
                       (HistoName+"_"+Region+"_"+btagStrategy))
 
         significanceFile.write(

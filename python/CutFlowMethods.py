@@ -13,14 +13,14 @@ def cutFlowExtraction(content, cutParameters, btagStrategies, cutHolder):
     for index, parameter in enumerate(cutParameters):
         jjbb_values, lvbb_values = content[index].split("=")[1].split("|")
         for tagged_values in [(jjbb_values.split(","), "jjbb"), (lvbb_values.split(","), "lvbb")]:
-            if tagged_values[0][-1] == "0":  # Some cut parameters don't cut anythign
+            if tagged_values[0][-1] == "0":  # Some cut parameters don't cut anything
                 for btagStrategy in btagStrategies:
                     cutHolder[parameter][tagged_values[1]
                                          ][btagStrategy].append("0")
                 cutHolder[parameter][tagged_values[1]]["Total"].append("0")
                 continue
             for tagging, cutFlowValue in enumerate(tagged_values[0]):
-                if tagged_values[0][tagging] == tagged_values[0][-1]:
+                if tagging == len(tagged_values[0]) - 1:
                     cutHolder[parameter][tagged_values[1]
                                          ]["Total"].append(cutFlowValue)
                 else:
@@ -42,7 +42,7 @@ def cutFlowPercentExtraction(content, cutParameters, btagStrategies, cutHolder):
             if parameter[-11:] == "TotalEvents":
                 total_events = [float(i) for i in tagged_values[0]]
                 for tagging, cutFlowValue in enumerate(tagged_values[0]):
-                    if tagged_values[0][tagging] == tagged_values[0][-1]:
+                    if tagging == len(tagged_values[0]) - 1:
                         cutHolder[parameter][tagged_values[1]
                                              ]["Total"].append(cutFlowValue)
                     else:
@@ -50,7 +50,7 @@ def cutFlowPercentExtraction(content, cutParameters, btagStrategies, cutHolder):
                             cutFlowValue)
                 continue
             for tagging, cutFlowValue in enumerate(tagged_values[0]):
-                if tagged_values[0][tagging] == tagged_values[0][-1]:
+                if tagging == len(tagged_values[0]) - 1:
                     cutHolder[parameter][tagged_values[1]]["Total"].append(
                         str((float(cutFlowValue)/total_events[-1])*100))
                 else:

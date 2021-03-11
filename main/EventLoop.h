@@ -275,6 +275,7 @@ public:
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
    int EventReadout = 0;
+   Float_t testTally = 0.0;
    bool flatCutFlow = true;
    bool realCutFlow = true;
    bool flatAltCutFlow = false;
@@ -571,6 +572,7 @@ EventLoop::~EventLoop()
 {
    if (flatCutFlow == true || realCutFlow == true)
    {
+      std::cout << testTally << "\n";
       m_cutFlowFileStream.open(m_cutFlowFileName);
       CutFlowParser(m_cutFlowFileStream, m_TotalEvents, "TotalEvents", flatCutFlow, realCutFlow);
       CutFlowParser(m_cutFlowFileStream, m_HadronicCutFlow, "Hadronic_rejected", flatCutFlow, realCutFlow);

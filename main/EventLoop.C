@@ -121,6 +121,7 @@ void EventLoop::Loop()
 
         if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
         {
+            testTally = testTally + EventWeight;
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
             h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
@@ -337,7 +338,7 @@ void EventLoop::FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_sign
 
 bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
                              Float_t hw_angle, Float_t solo_jet_ptv)
-{
+{ //THIS FUNCTION RESTRICTS THE EVENT BAISED ON THE CHOSEN JET PARAMETERS
     bool status_W = false;
     bool status = false;
     if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
@@ -367,8 +368,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
     }
     else if (Lepton_Charge > 0. && FJets.size() == 1)
     {
-        Higgs = FJets.at(0);
-        Wplus = GetWBoson(status_W);
+        Wplus = GetWBoson(status_W); // Must be done here as status_W has scope limitations
         if (!status_W)
         {
             CutFlowAssignment(m_PositiveLepWCutflow, flatCutFlow, realCutFlow);
@@ -380,8 +380,6 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
             return status;
         }
         status = true;
-        m_ntagsOutside = m_NTags_trkJ - nTaggedVRTrkJetsInFJet.at(0);
-        m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
     }
     m_DeltaPhi_HW = fabs(Wplus.DeltaPhi(Higgs));
     m_mVH = (Wplus + Higgs).M() * 0.001;
@@ -389,7 +387,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
 }
 
 void EventLoop::SetJetPair()
-{
+{ //THIS FUNCTION SETS THE SM HIGGS AND W BOSON JETS
     if (FJets.size() < 1)
     {
         if (jjbb == true)
@@ -410,14 +408,13 @@ void EventLoop::SetJetPair()
 
     if (FJets.size() == 1)
     {
+        Higgs = FJets.at(0);
         m_NTags = m_NTags_trkJ;
+        m_ntagsOutside = m_NTags_trkJ - nTaggedVRTrkJetsInFJet.at(0);
+        m_bTagCategory = GetBTagCategory(m_NTags_Higgs, m_ntagsOutside);
         return;
     }
 
-    // Higgs = FJets.at(0).M() > FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-    // Wplus = FJets.at(0).M() < FJets.at(1).M() ? FJets.at(0) : FJets.at(1);
-    // m_NTags_Higgs = FJets.at(0).M() > FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
-    // m_NTags_Wplus = FJets.at(0).M() < FJets.at(1).M() ? nTaggedVRTrkJetsInFJet.at(0) : nTaggedVRTrkJetsInFJet.at(1);
     const double_t higgsMass = 125100;
     const double_t wplusMass = 80379;
     Higgs = TLorentzVector(10000000.0, 10000000.0, 10000000.0, 10000000.0); // Impossibly big so it gets reassigned
@@ -426,7 +423,7 @@ void EventLoop::SetJetPair()
     int indexHiggs = 0;
 
     for (int i = 0; i < FJets.size(); i++)
-    {
+    { //HERE WE TRY TO FIND THE JETS CLOSEST TO THE MASSES OF THE SM HIGGS AND W BOSON
 
         if (abs(higgsMass - FJets.at(i).M()) < abs(higgsMass - Higgs.M()) &&
             abs(wplusMass - FJets.at(i).M()) > abs(higgsMass - FJets.at(i).M()))
