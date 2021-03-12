@@ -1,6 +1,7 @@
 #define EventLoop_cxx
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <numeric>
 #include "EventLoop.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -31,22 +32,23 @@ void EventLoop::Loop()
             }
         }
 
-        map<TString, std::vector<TH1F *>> local = h_mH->GetTwoTagHistos();
-        // integral =
-        for (auto const &x : local)
-        {
-            std::cout << "\n"
-                      << x.first << ": ";
-            for (auto const i : x.second)
-            {
-                std::cout << i->Integral(-1, 30, "") << " ";
-            }
-            std::cout << "\n";
-        }
+        std::vector<Double_t> mH_integral;
 
-        // std::cout << "These are the events that pass into the histograms : " << testTally1 << "\n"
-        //           << "These are the events that are written into the histograms : " << testTally2 << "\n"
-        //           << "These are the events that are integrated : " << internal << "\n";
+        map<TString, std::vector<TH1F *>> TwoTagHisto = h_mH->GetTwoTagHistos();
+        map<TString, std::vector<TH1F *>> ThreeTagHisto = h_mH->GetThreeTagHistos();
+        map<TString, std::vector<TH1F *>> FourTagHisto = h_mH->GetFourTagHistos();
+
+        mH_integral.push_back(TwoTagHisto["Merged_LepP_SR_TwoTags"][0]->Integral(-1, 30, ""));
+        mH_integral.push_back(TwoTagHisto["Merged_LepN_SR_TwoTags"][0]->Integral(-1, 30, ""));
+        mH_integral.push_back(ThreeTagHisto["Merged_LepP_SR_ThreeTags"][0]->Integral(-1, 30, ""));
+        mH_integral.push_back(ThreeTagHisto["Merged_LepN_SR_ThreeTags"][0]->Integral(-1, 30, ""));
+        mH_integral.push_back(FourTagHisto["Merged_LepP_SR_FourPlusTags"][0]->Integral(-1, 30, ""));
+        mH_integral.push_back(FourTagHisto["Merged_LepN_SR_FourPlusTags"][0]->Integral(-1, 30, ""));
+
+        Double_t sum_of_elems = std::accumulate(mH_integral.begin(), mH_integral.end(),
+                                                decltype(mH_integral)::value_type(0));
+
+        integral_total = sum_of_elems;
 
         for (auto sel : mySel)
         {
@@ -140,6 +142,7 @@ void EventLoop::Loop()
         if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
         {
             testTally1 = testTally1 + EventWeight;
+            testTally2 = testTally2 + std::abs(EventWeight);
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
             h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
@@ -639,7 +642,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.jjbb_weightedTwoTags = cutVariable.jjbb_weightedTwoTags + std::abs(EventWeight);
+                    cutVariable.jjbb_weightedTwoTags = cutVariable.jjbb_weightedTwoTags + EventWeight;
                 }
             }
             else if (m_NTags == 3)
@@ -650,7 +653,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + std::abs(EventWeight);
+                    cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + EventWeight;
                 }
             }
             else if (m_NTags == 4)
@@ -661,7 +664,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.jjbb_weightedFourPlusTags = cutVariable.jjbb_weightedFourPlusTags + std::abs(EventWeight);
+                    cutVariable.jjbb_weightedFourPlusTags = cutVariable.jjbb_weightedFourPlusTags + EventWeight;
                 }
             }
         }
@@ -675,7 +678,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.lvbb_weightedTwoTags = cutVariable.lvbb_weightedTwoTags + std::abs(EventWeight);
+                    cutVariable.lvbb_weightedTwoTags = cutVariable.lvbb_weightedTwoTags + EventWeight;
                 }
             }
             else if (m_NTags == 3)
@@ -686,7 +689,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + std::abs(EventWeight);
+                    cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + EventWeight;
                 }
             }
             else if (m_NTags == 4)
@@ -697,7 +700,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                 }
                 if (XrealCutFlow == true)
                 {
-                    cutVariable.lvbb_weightedFourPlusTags = cutVariable.lvbb_weightedFourPlusTags + std::abs(EventWeight);
+                    cutVariable.lvbb_weightedFourPlusTags = cutVariable.lvbb_weightedFourPlusTags + EventWeight;
                 }
             }
         }
@@ -888,7 +891,6 @@ void EventLoop ::Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *
 
 void EventLoop::Write(TDirectory *dir, std::string dirname)
 {
-    testTally2 = testTally2 + EventWeight;
     h_MET->Write(dir, ("MET"));
     h_METSig->Write(dir, ("METSig"));
     h_MinDeltaPhiJETMET->Write(dir, ("MinDeltaPhiJETMET"));
