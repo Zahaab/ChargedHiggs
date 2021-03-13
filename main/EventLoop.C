@@ -32,24 +32,6 @@ void EventLoop::Loop()
             }
         }
 
-        std::vector<Double_t> mH_integral;
-
-        map<TString, std::vector<TH1F *>> TwoTagHisto = h_mH->GetTwoTagHistos();
-        map<TString, std::vector<TH1F *>> ThreeTagHisto = h_mH->GetThreeTagHistos();
-        map<TString, std::vector<TH1F *>> FourTagHisto = h_mH->GetFourTagHistos();
-
-        mH_integral.push_back(TwoTagHisto["Merged_LepP_SR_TwoTags"][0]->Integral(-1, 30, ""));
-        mH_integral.push_back(TwoTagHisto["Merged_LepN_SR_TwoTags"][0]->Integral(-1, 30, ""));
-        mH_integral.push_back(ThreeTagHisto["Merged_LepP_SR_ThreeTags"][0]->Integral(-1, 30, ""));
-        mH_integral.push_back(ThreeTagHisto["Merged_LepN_SR_ThreeTags"][0]->Integral(-1, 30, ""));
-        mH_integral.push_back(FourTagHisto["Merged_LepP_SR_FourPlusTags"][0]->Integral(-1, 30, ""));
-        mH_integral.push_back(FourTagHisto["Merged_LepN_SR_FourPlusTags"][0]->Integral(-1, 30, ""));
-
-        Double_t sum_of_elems = std::accumulate(mH_integral.begin(), mH_integral.end(),
-                                                decltype(mH_integral)::value_type(0));
-
-        integral_total = sum_of_elems;
-
         for (auto sel : mySel)
         {
             pass_sel[sel] = false;
@@ -63,6 +45,8 @@ void EventLoop::Loop()
         m_EventWeights.clear();
         m_EventWeights.push_back(EventWeight);
 
+        testTally1 = testTally1 + EventWeight;
+
         SetJetVectors();
         bool status_W = false;
         bool status = false;
@@ -72,10 +56,13 @@ void EventLoop::Loop()
 
         // Key: Positively or a negatively charged lepton (LepN or LepP), a fat jet ("Merged"),  slimmer jets ("resolved"), background-enriched ("CR"), signal enriched ("SR").
         // This bool ensures that fat or slim jets are passed
+
         bool passed_merged_preselection = PassEventSelectionBoosted(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv);
         bool passed_resovled_preselction = PassEventSelectionResolved();
         if (!passed_merged_preselection && !passed_resovled_preselction)
             continue;
+
+        testTally13 = testTally13 + EventWeight;
 
         if (Jets.size() >= 4 && Lepton_Charge < 0)
         {
@@ -141,8 +128,7 @@ void EventLoop::Loop()
 
         if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
         {
-            testTally1 = testTally1 + EventWeight;
-            testTally2 = testTally2 + std::abs(EventWeight);
+            testTally14 = testTally14 + EventWeight;
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
             h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
@@ -362,44 +348,57 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
 { //THIS FUNCTION RESTRICTS THE EVENT BAISED ON THE CHOSEN JET PARAMETERS
     bool status_W = false;
     bool status = false;
-    if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
+    if (FJets.size() > 1)
     {
+        testTally6a = testTally6a + EventWeight;
         if (Higgs.Pt() < jet0_ptv)
         {
             CutFlowAssignment(m_HiggsPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
 
+        testTally7 = testTally7 + EventWeight;
+
         if (Higgs.DeltaR(*Lepton4vector) < lep_jet0_angle)
         {
             CutFlowAssignment(m_Higgs_LeptonAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
+
+        testTally8 = testTally8 + EventWeight;
         if (Wplus.DeltaR(*Lepton4vector) < lep_jet1_angle)
         {
             CutFlowAssignment(m_Wplus_LeptonAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
+
+        testTally9 = testTally9 + EventWeight;
         if (m_DeltaPhi_HW < hw_angle)
         {
             CutFlowAssignment(m_Higgs_WplusAngleCutflow, flatCutFlow, realCutFlow);
             return status;
         }
+
+        testTally10 = testTally10 + EventWeight;
         status = true;
     }
     else if (Lepton_Charge > 0. && FJets.size() == 1)
     {
+        testTally10a = testTally10a + EventWeight;
         Wplus = GetWBoson(status_W); // Must be done here as status_W has scope limitations
         if (!status_W)
         {
             CutFlowAssignment(m_PositiveLepWCutflow, flatCutFlow, realCutFlow);
             return status;
         }
+
+        testTally11 = testTally11 + EventWeight;
         if (Higgs.Pt() < solo_jet_ptv)
         {
             CutFlowAssignment(m_PositiveLepHiggsPtCutFlow, flatCutFlow, realCutFlow);
             return status;
         }
+        testTally12 = testTally12 + EventWeight;
         status = true;
     }
     m_DeltaPhi_HW = fabs(Wplus.DeltaPhi(Higgs));
@@ -656,7 +655,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                     cutVariable.jjbb_weightedThreeTags = cutVariable.jjbb_weightedThreeTags + EventWeight;
                 }
             }
-            else if (m_NTags == 4)
+            else if (m_NTags > 3)
             {
                 if (XflatCutFlow == true)
                 {
@@ -692,7 +691,7 @@ void EventLoop::CutFlowAssignment(CutFlowType &cutVariable, bool XflatCutFlow, b
                     cutVariable.lvbb_weightedThreeTags = cutVariable.lvbb_weightedThreeTags + EventWeight;
                 }
             }
-            else if (m_NTags == 4)
+            else if (m_NTags > 3)
             {
                 if (XflatCutFlow == true)
                 {
@@ -725,7 +724,16 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
         jjbb = false; //Leptonic Channel
     }
 
+    testTally2 = testTally2 + EventWeight;
+
     SetJetPair();
+
+    if (m_NTags == 0 || m_NTags == 1 || m_NTags == -1)
+    {
+        return false;
+    }
+
+    testTally3 = testTally3 + EventWeight;
 
     CutFlowAssignment(m_TotalEvents, flatCutFlow, realCutFlow);
 
@@ -734,11 +742,16 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
         CutFlowAssignment(m_HadronicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
+
+    testTally4 = testTally4 + EventWeight;
+
     if (Lepton_Charge > 0 && FJets.size() < 1)
     {
         CutFlowAssignment(m_LeptonicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
+
+    testTally5 = testTally5 + EventWeight;
 
     altCutFlow(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
                hw_angle, solo_jet_ptv);
@@ -748,6 +761,8 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
         CutFlowAssignment(m_ChannelFlexCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
+
+    testTally6 = testTally6 + EventWeight;
 
     return FindFJetPair(jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
                         hw_angle, solo_jet_ptv);

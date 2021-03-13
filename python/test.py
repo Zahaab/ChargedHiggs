@@ -50,8 +50,8 @@ dscale = 1.223695
 escale = 1.61419497
 
 HistoName = "mH"
-Region = "Merged_LepN_SR"
-btagStrategy = "FourPlusTags"
+Region = "Merged_LepP_SR"
+btagStrategy = "TwoTags"
 
 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
     h_sig_Hplus_m400list = []
