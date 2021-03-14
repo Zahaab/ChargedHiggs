@@ -129,7 +129,7 @@ void EventLoop::Loop()
             }
         }
 
-        if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
+        if (pass_sel["Merged_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Merged_LepP_SR"])
         {
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
