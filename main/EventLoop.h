@@ -685,6 +685,31 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    h_MET_over_sqrtHT = new TH1Fs(sampleName + "_MET_over_rootHT", "", 30, 0, 600, mySel, m_UncNames, ExpUncertaintyName);
    h_m_NTags_trkJ = new TH1Fs(sampleName + "_m_NTags_trkJ", "", 13, -0.5, 12.5, mySel, m_UncNames, ExpUncertaintyName);
 
+   h_MET->Sumw2();
+   h_METSig->Sumw2();
+   h_Lepton_Eta->Sumw2();
+   h_Lepton_Pt->Sumw2();
+   h_NBtags->Sumw2();
+   h_Njets->Sumw2();
+   h_NFjets->Sumw2();
+   h_Mwt->Sumw2();
+   h_MinDeltaPhiJETMET->Sumw2();
+   h_HT->Sumw2();
+   h_HT_bjets->Sumw2();
+   h_HT_bjets_Lepton_Pt->Sumw2();
+   h_DeltaPhi_HW->Sumw2();
+   h_maxMVAResponse->Sumw2();
+   h_pTH->Sumw2();
+   h_pTH_over_mVH->Sumw2();
+   h_pTWplus->Sumw2();
+   h_pTW_over_mVH->Sumw2();
+   h_pTWminus->Sumw2();
+   h_mH->Sumw2();
+   h_mWplus->Sumw2();
+   h_tagCategory->Sumw2();
+   h_mass_resolution->Sumw2();
+   h_MET_over_sqrtHT->Sumw2();
+   h_m_NTags_trkJ->Sumw2();
    // Set object pointer
    Description = 0;
    MET = 0;

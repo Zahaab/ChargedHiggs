@@ -81,3 +81,28 @@ void TH1Fs::Write(TDirectory *dir, std::string dirname)
 const map<TString, std::vector<TH1F *>> TH1Fs::GetTwoTagHistos() const { return m_histos_twoTag; }
 const map<TString, std::vector<TH1F *>> TH1Fs::GetThreeTagHistos() const { return m_histos_threeTag; }
 const map<TString, std::vector<TH1F *>> TH1Fs::GetFourTagHistos() const { return m_histos_fourTag; }
+
+void TH1Fs::Sumw2()
+{
+   for (auto const &pair : m_histos_twoTag)
+   {
+      for (auto histo_two : m_histos_twoTag[pair.first])
+      {
+         histo_two->Sumw2();
+      }
+   }
+   for (auto const &pair : m_histos_threeTag)
+   {
+      for (auto histo_three : m_histos_threeTag[pair.first])
+      {
+         histo_three->Sumw2();
+      }
+   }
+   for (auto const &pair : m_histos_fourTag)
+   {
+      for (auto histo_four : m_histos_fourTag[pair.first])
+      {
+         histo_four->Sumw2();
+      }
+   }
+}

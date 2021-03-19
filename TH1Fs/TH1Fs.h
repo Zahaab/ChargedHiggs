@@ -101,6 +101,7 @@ public:
 
    void Fill(double val, std::vector<double> weight, map<TString, bool> sel, int NTags);
    void Write(TDirectory *dir, std::string dirname);
+   void Sumw2();
    const map<TString, std::vector<TH1F *>> GetTwoTagHistos() const;
    const map<TString, std::vector<TH1F *>> GetThreeTagHistos() const;
    const map<TString, std::vector<TH1F *>> GetFourTagHistos() const;

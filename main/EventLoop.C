@@ -89,14 +89,14 @@ void EventLoop::Loop()
                 if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
                 {
                     pass_sel["Merged_LepN_CR"] = true;
-                }
-                if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub)))
-                {
-                    CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
-                }
-                else if (!((Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
-                {
-                    CutFlowAssignment(m_WplusMassCutFlow, flatCutFlow, realCutFlow);
+                    if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
+                    {
+                        CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
+                    }
+                    else if (!(Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub))
+                    {
+                        CutFlowAssignment(m_WplusMassCutFlow, flatCutFlow, realCutFlow);
+                    }
                 }
             }
         }
@@ -129,7 +129,7 @@ void EventLoop::Loop()
             }
         }
 
-        if (pass_sel["Merged_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Merged_LepP_SR"])
+        if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
         {
             h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
             h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
@@ -350,7 +350,7 @@ bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet
 { //THIS FUNCTION RESTRICTS THE EVENT BAISED ON THE CHOSEN JET PARAMETERS
     bool status_W = false;
     bool status = false;
-    if (FJets.size() > 1)
+    if (Lepton_Charge < 0. || Lepton_Charge > 0. && FJets.size() > 1)
     {
         if (Higgs.Pt() < jet0_ptv)
         {
@@ -721,6 +721,7 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
 
     if (m_NTags == 0 || m_NTags == 1 || m_NTags == -1)
     {
+        std::cout << "vat? " << FJets.size() << "\n";
         return false;
     }
 
