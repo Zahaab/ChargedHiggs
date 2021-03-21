@@ -292,6 +292,8 @@ gStyle.SetPalette(1)
 gROOT.LoadMacro("../style/AtlasStyle.C")
 gROOT.LoadMacro("../style/AtlasUtils.C")
 SetAtlasStyle()
+gStyle.SetEndErrorSize(6)
+# gStyle.SetErrorX(1.)
 
 y_axis_label = "Event fraction"
 c_blue = TColor.GetColor("#3366ff")
@@ -387,7 +389,8 @@ for HistoName in histoNames:
 
                 h_sig_Hplus_m400 = sumHistosList(h_sig_Hplus_m400list)
                 h_sig_Hplus_m400.SetLineColor(kBlack)
-                h_sig_Hplus_m400.SetLineStyle(7)
+                h_sig_Hplus_m400.SetLineStyle(1)
+                h_sig_Hplus_m400.SetMarkerStyle(1)
                 if ReBin == True:
                     h_sig_Hplus_m400.Rebin(2)
             if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
@@ -421,7 +424,8 @@ for HistoName in histoNames:
 
                 h_sig_Hplus_m800 = sumHistosList(h_sig_Hplus_m800list)
                 h_sig_Hplus_m800.SetLineColor(kBlue)
-                h_sig_Hplus_m800.SetLineStyle(7)
+                h_sig_Hplus_m800.SetLineStyle(1)
+                h_sig_Hplus_m800.SetMarkerStyle(1)
                 if ReBin == True:
                     h_sig_Hplus_m800.Rebin(2)
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
@@ -455,7 +459,8 @@ for HistoName in histoNames:
 
                 h_sig_Hplus_m1600 = sumHistosList(h_sig_Hplus_m1600list)
                 h_sig_Hplus_m1600.SetLineColor(kViolet)
-                h_sig_Hplus_m1600.SetLineStyle(7)
+                h_sig_Hplus_m1600.SetLineStyle(1)
+                h_sig_Hplus_m1600.SetMarkerStyle(1)
                 if ReBin == True:
                     h_sig_Hplus_m1600.Rebin(2)
 
@@ -732,9 +737,13 @@ for HistoName in histoNames:
             if h_all_background != 0:
                 h_all_background.SetLineColor(1)
                 h_all_background.SetFillColor(8)
+                h_all_background.SetLineStyle(1)
+                h_all_background.SetMarkerStyle(1)
             if h_other_background_list != []:
                 h_other_background.SetLineColor(1)
                 h_other_background.SetFillColor(kRed-3)
+                h_other_background.SetLineStyle(1)
+                h_other_background.SetMarkerStyle(1)
 
             #nbins = 20
             ymax = 0
@@ -770,53 +779,53 @@ for HistoName in histoNames:
             if h_all_background != 0:
                 h_all_background.SetNdivisions(8)
                 h_all_background.SetXTitle(Xaxis_label)
-                h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.2)
+                h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_all_background.GetXaxis().SetRangeUser(0.001, 700)
-                h_all_background.Draw("0 HIST")
+                h_all_background.Draw("E1 HIST")
                 if h_other_background_list != []:
-                    h_other_background.Draw("0 HISTSAME")
+                    h_other_background.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
-                    h_sig_Hplus_m400n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m400n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                    h_sig_Hplus_m800n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m800n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                    h_sig_Hplus_m1600n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m1600n.Draw("E1 HISTSAME")
             elif h_other_background_list != []:
                 h_other_background.SetNdivisions(8)
                 h_other_background.SetXTitle(Xaxis_label)
-                h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.2)
+                h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_other_background.GetXaxis().SetRangeUser(0.001, 700)
-                h_other_background.Draw("0 HIST")
+                h_other_background.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
-                    h_sig_Hplus_m400n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m400n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                    h_sig_Hplus_m800n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m800n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                    h_sig_Hplus_m1600n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m1600n.Draw("E1 HISTSAME")
             elif config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 h_sig_Hplus_m400n.SetNdivisions(8)
                 h_sig_Hplus_m400n.SetXTitle(Xaxis_label)
-                h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001, ymax*1.2)
+                h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_sig_Hplus_m400n.GetXaxis().SetRangeUser(0.001, 700)
-                h_sig_Hplus_m400n.Draw("0 HIST")
+                h_sig_Hplus_m400n.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
-                    h_sig_Hplus_m800n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m800n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                    h_sig_Hplus_m1600n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m1600n.Draw("E1 HISTSAME")
             elif config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                 h_sig_Hplus_m800n.SetNdivisions(8)
                 h_sig_Hplus_m800n.SetXTitle(Xaxis_label)
-                h_sig_Hplus_m800n.GetYaxis().SetRangeUser(0.001, ymax*1.2)
+                h_sig_Hplus_m800n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_sig_Hplus_m800n.GetXaxis().SetRangeUser(0.001, 700)
-                h_sig_Hplus_m800n.Draw("0 HIST")
+                h_sig_Hplus_m800n.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
-                    h_sig_Hplus_m1600n.Draw("0 HISTSAME")
+                    h_sig_Hplus_m1600n.Draw("E1 HISTSAME")
             elif config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 h_sig_Hplus_m1600n.SetNdivisions(8)
                 h_sig_Hplus_m1600n.SetXTitle(Xaxis_label)
-                h_sig_Hplus_m1600n.GetYaxis().SetRangeUser(0.001, ymax*1.2)
+                h_sig_Hplus_m1600n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_sig_Hplus_m1600n.GetXaxis().SetRangeUser(0.001, 700)
-                h_sig_Hplus_m1600n.Draw("0 HIST")
+                h_sig_Hplus_m1600n.Draw("E1 HIST")
 
             leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)
             atlas_lable = ATLAS_LABEL(0.19, 0.95)
