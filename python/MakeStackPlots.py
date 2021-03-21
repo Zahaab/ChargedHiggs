@@ -780,7 +780,7 @@ for HistoName in histoNames:
                 h_all_background.SetNdivisions(8)
                 h_all_background.SetXTitle(Xaxis_label)
                 h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-                h_all_background.GetXaxis().SetRangeUser(0.001, 700)
+                h_all_background.GetXaxis().SetRangeUser(0.001, 2400)
                 h_all_background.Draw("E1 HIST")
                 if h_other_background_list != []:
                     h_other_background.Draw("E1 HISTSAME")
@@ -794,7 +794,7 @@ for HistoName in histoNames:
                 h_other_background.SetNdivisions(8)
                 h_other_background.SetXTitle(Xaxis_label)
                 h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-                h_other_background.GetXaxis().SetRangeUser(0.001, 700)
+                h_other_background.GetXaxis().SetRangeUser(0.001, 2400)
                 h_other_background.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400n.Draw("E1 HISTSAME")
@@ -806,7 +806,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m400n.SetNdivisions(8)
                 h_sig_Hplus_m400n.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m400n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-                h_sig_Hplus_m400n.GetXaxis().SetRangeUser(0.001, 700)
+                h_sig_Hplus_m400n.GetXaxis().SetRangeUser(0.001, 2400)
                 h_sig_Hplus_m400n.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                     h_sig_Hplus_m800n.Draw("E1 HISTSAME")
@@ -816,7 +816,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m800n.SetNdivisions(8)
                 h_sig_Hplus_m800n.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m800n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-                h_sig_Hplus_m800n.GetXaxis().SetRangeUser(0.001, 700)
+                h_sig_Hplus_m800n.GetXaxis().SetRangeUser(0.001, 2400)
                 h_sig_Hplus_m800n.Draw("E1 HIST")
                 if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                     h_sig_Hplus_m1600n.Draw("E1 HISTSAME")
@@ -824,7 +824,7 @@ for HistoName in histoNames:
                 h_sig_Hplus_m1600n.SetNdivisions(8)
                 h_sig_Hplus_m1600n.SetXTitle(Xaxis_label)
                 h_sig_Hplus_m1600n.GetYaxis().SetRangeUser(0.001, ymax*1.3)
-                h_sig_Hplus_m1600n.GetXaxis().SetRangeUser(0.001, 700)
+                h_sig_Hplus_m1600n.GetXaxis().SetRangeUser(0.001, 2400)
                 h_sig_Hplus_m1600n.Draw("E1 HIST")
 
             leg = TLegend(leg_pl1, leg_pl2, leg_pl3, leg_pl4)

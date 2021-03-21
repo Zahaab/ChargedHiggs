@@ -84,8 +84,8 @@ def getaxisLabels(HistoName):
         text_place = [0.38, 0.895]
     elif "mVH" == HistoName:
         Xaxis_label = "m_{VH} [GeV]"
-        legend_place = [0.65, 0.73, 0.91, 0.885]
-        text_place = [0.65, 0.895]
+        legend_place = [0.69, 0.8, 0.93, 0.885]
+        text_place = [0.69, 0.895]
     elif "DeltaPhi_HW" == HistoName:
         Xaxis_label = "#Delta#phi of Higgs and W-boson"
         legend_place = [0.19, 0.73, 0.45, 0.885]
