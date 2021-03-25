@@ -770,6 +770,7 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    if (!tree)
       return;
    fChain = tree;
+   // fChain->SetCacheSize(1000000LL);
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
@@ -809,39 +810,39 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    fChain->SetBranchAddress("TrackJet_btagWeight", &TrackJet_btagWeight, &b_TrackJet_btagWeight);
    Notify();
 
-   m_myTree = new TTree("MVATree", "");
-   /*
-   m_myTree->Branch("nJet",	     &nJet);
-   m_myTree->Branch("nBJet",         &m_NTags);
-   m_myTree->Branch("HT_bjets",	     &m_HT_bjets);
-   m_myTree->Branch("maxEta_bjets",  &m_maxEta_bjets);
-   m_myTree->Branch("maxPT_bjets",   &m_maxPT_bjets);
-   m_myTree->Branch("Wleptonic_pT",  &m_Wleptonic_pT);
-   m_myTree->Branch("Wleptonic_Eta", &m_Wleptonic_Eta);
-   m_myTree->Branch("Lep_PT",        &m_Lep_PT);
-   m_myTree->Branch("MET",           &m_MET);
-   m_myTree->Branch("Lepton_Charge", &Lepton_Charge);
-   m_myTree->Branch("is_Signal",     &m_is_Signal);
-   m_myTree->Branch("EventWeight",   &EventWeight);*/
+   // m_myTree = new TTree("MVATree", "");
+   // /*
+   // m_myTree->Branch("nJet",	     &nJet);
+   // m_myTree->Branch("nBJet",         &m_NTags);
+   // m_myTree->Branch("HT_bjets",	     &m_HT_bjets);
+   // m_myTree->Branch("maxEta_bjets",  &m_maxEta_bjets);
+   // m_myTree->Branch("maxPT_bjets",   &m_maxPT_bjets);
+   // m_myTree->Branch("Wleptonic_pT",  &m_Wleptonic_pT);
+   // m_myTree->Branch("Wleptonic_Eta", &m_Wleptonic_Eta);
+   // m_myTree->Branch("Lep_PT",        &m_Lep_PT);
+   // m_myTree->Branch("MET",           &m_MET);
+   // m_myTree->Branch("Lepton_Charge", &Lepton_Charge);
+   // m_myTree->Branch("is_Signal",     &m_is_Signal);
+   // m_myTree->Branch("EventWeight",   &EventWeight);*/
 
-   m_myTree->Branch("btagjH1", &m_btagjH1);
-   m_myTree->Branch("btagjH2", &m_btagjH2);
-   m_myTree->Branch("btagjW1", &m_btagjWp1);
-   m_myTree->Branch("btagjW2", &m_btagjWp2);
-   m_myTree->Branch("H_mass", &m_H_mass);
-   m_myTree->Branch("Wp_mass", &m_Wp_mass);
-   m_myTree->Branch("H_pT", &m_H_pT);
-   m_myTree->Branch("Wp_pT", &m_Wp_pT);
-   m_myTree->Branch("pTjH1", &m_pTjH1);
-   m_myTree->Branch("pTjH2", &m_pTjH2);
-   m_myTree->Branch("pTjWp1", &m_pTjWp1);
-   m_myTree->Branch("pTjWp2", &m_pTjWp2);
-   m_myTree->Branch("dRjjH", &m_dRjjH);
-   m_myTree->Branch("dRjjWp", &m_dRjjWp);
-   m_myTree->Branch("Phi_HW", &m_Phi_HW);
-   m_myTree->Branch("mass_VH", &m_mass_VH);
-   m_myTree->Branch("is_Signal", &m_is_Signal);
-   m_myTree->Branch("EventWeight", &EventWeight);
+   // m_myTree->Branch("btagjH1", &m_btagjH1);
+   // m_myTree->Branch("btagjH2", &m_btagjH2);
+   // m_myTree->Branch("btagjW1", &m_btagjWp1);
+   // m_myTree->Branch("btagjW2", &m_btagjWp2);
+   // m_myTree->Branch("H_mass", &m_H_mass);
+   // m_myTree->Branch("Wp_mass", &m_Wp_mass);
+   // m_myTree->Branch("H_pT", &m_H_pT);
+   // m_myTree->Branch("Wp_pT", &m_Wp_pT);
+   // m_myTree->Branch("pTjH1", &m_pTjH1);
+   // m_myTree->Branch("pTjH2", &m_pTjH2);
+   // m_myTree->Branch("pTjWp1", &m_pTjWp1);
+   // m_myTree->Branch("pTjWp2", &m_pTjWp2);
+   // m_myTree->Branch("dRjjH", &m_dRjjH);
+   // m_myTree->Branch("dRjjWp", &m_dRjjWp);
+   // m_myTree->Branch("Phi_HW", &m_Phi_HW);
+   // m_myTree->Branch("mass_VH", &m_mass_VH);
+   // m_myTree->Branch("is_Signal", &m_is_Signal);
+   // m_myTree->Branch("EventWeight", &EventWeight);
 }
 
 Bool_t EventLoop::Notify()

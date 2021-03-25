@@ -23,12 +23,15 @@ void EventLoop::Loop()
             break;
         nb = fChain->GetEntry(jentry);
         nbytes += nb;
-
         if (EventReadout != 0)
         {
             if (jentry % EventReadout == 0)
             {
                 std::cout << "Processing " << jentry << " events!!!" << std::endl;
+                std::cout << "Data : " << nbytes << " Bytes"
+                          << "\n"
+                          << "Data : " << nbytes * 0.000000001 << " Gigabytes"
+                          << "\n";
             }
         }
 
@@ -157,7 +160,7 @@ void EventLoop::Loop()
             // h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
             // h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
         }
-        ////WriteMVAInput();
+        //WriteMVAInput();
     }
 }
 
@@ -264,7 +267,7 @@ void EventLoop::WriteMVAInput()
     m_Wleptonic_pT = Wminus.Pt() * 0.001;
     m_Wleptonic_Eta = fabs(Wminus.Eta());
     m_is_Signal = 1;
-    m_myTree->Fill();
+    //m_myTree->Fill();
 }
 
 double EventLoop::GetTruthMass()
@@ -341,7 +344,7 @@ void EventLoop::FillMVATree(int i_H1, int i_H2, int i_w1, int i_w2, bool is_sign
     m_Phi_HW = fabs((Jets.at(i_H1) + Jets.at(i_H2)).DeltaPhi((Jets.at(i_w1) + Jets.at(i_w2))));
     m_mass_VH = (Jets.at(i_H1) + Jets.at(i_H2) + Jets.at(i_w1) + Jets.at(i_w2)).M() * 0.001;
     m_is_Signal = is_signal;
-    m_myTree->Fill();
+    //m_myTree->Fill();
 }
 
 bool EventLoop::FindFJetPair(Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle, Float_t lep_jet1_angle,
@@ -915,5 +918,5 @@ void EventLoop::Write(TDirectory *dir, std::string dirname)
     // h_MET_over_sqrtHT->Write(dir, ("MET_over_rootHT"));
     // h_m_NTags_trkJ->Write(dir, ("m_NTags_trkJ"));
     dir->cd();
-    m_myTree->Write();
+    //m_myTree->Write();
 }

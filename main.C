@@ -57,13 +57,12 @@ int main(int argc, char **argv)
       OutFileName = OUTPUTDIR + "/PlotFiles/" + OutFileName;
     }
 
-    std::cout << OutFileName << "\n"
-              << path << "\n";
-
     TFile *outfile = TFile::Open(OutFileName, "RECREATE");
+
     for (unsigned int i = 0; i < TreeNames.size(); i++)
     {
       // This is where TreeNames.at(i) = TreeNames[i]
+      std::cout << TreeNames.at(i);
       TString TreeName = TString(TreeNames.at(i));
       TChain *mych_data = new TChain(TreeName);
       // This adds the absolute path of the sampleName file to
