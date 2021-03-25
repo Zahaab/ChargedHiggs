@@ -19,6 +19,31 @@ class TH1Fs
 
 public:
    TH1Fs(){};
+   ~TH1Fs()
+   {
+      for (auto pair : m_histos_twoTag)
+      {
+         for (auto histo_two : pair.second)
+         {
+            delete histo_two;
+         }
+      }
+      for (auto &pair : m_histos_threeTag)
+      {
+         for (auto histo_three : pair.second)
+         {
+            delete histo_three;
+         }
+      }
+      for (auto &pair : m_histos_fourTag)
+      {
+         for (auto histo_four : pair.second)
+         {
+            delete histo_four;
+         }
+      }
+   }
+
    TH1Fs(TString histname, TString title, int nbins, double xlow, double xup, vector<TString> sel, std::vector<TString> UncertaintyNames, TString ExpUncertaintyName)
    {
 

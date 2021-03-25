@@ -13,13 +13,24 @@ from CutFlowMethods import prepareCutHolder, cutFlowExtraction, cutFlowPercentEx
 _, config_path = sys.argv
 
 config = configParser(config_path)
+# This is the output of the c++, thus input of python
+input_dir = config["OUTPUTDIR"]
 MCDataPeriodes = getConfigData(config, "Stack_")
 histoNames = getConfigData(config, "Graph_")
 btagStrategies = getConfigData(config, "Btag_")
-dataPeriodeStack = "-".join(MCDataPeriodes)
 histoFiles = {i: getPlotFiles(config, i) for i in MCDataPeriodes}
 plotEvents = getConfigData(config, "Plot_")
 Regions = getConfigData(config, "Region_")
+
+if len(MCDataPeriodes) < 2:
+    dataPeriodeStack = str(MCDataPeriodes[0])
+else:
+    dataPeriodeStack = "-".join(MCDataPeriodes)
+
+for data_set in plotEvents:
+    for dataPeriode in MCDataPeriodes:
+        histoFiles[dataPeriode][data_set] = input_dir + "/" + \
+            "PlotFiles/" + histoFiles[dataPeriode][data_set]
 
 outputdir = str("../Plots/" + config["WP"] + "/" + "StackPlots" + "/" + dataPeriodeStack + "-" + config["Higgs_mass_lower_bound"] + "-" + config["Higgs_mass_upper_bound"] + "-" +
                 config["Wboson_mass_lower_bound"] + "-" + config["Wboson_mass_upper_bound"] + "-" + config["Missing_transverse_momentum"] + "-" +
@@ -144,7 +155,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
             altrealCutFlow_content = []
             cutFlowPath = histoFiles[dataPeriod][data_set].replace(
                 ".root", "-cutFlow.txt")
-            rawCutFlow = open("../PlotFiles/"+cutFlowPath, "r")
+            rawCutFlow = open(cutFlowPath, "r")
             rawCutFlow_content = rawCutFlow.read().split("\n")
             for line in rawCutFlow_content:
                 if line == "":
@@ -158,7 +169,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
             if config["CSV_AlternateCutFlow"] == "Enable":
                 altcutFlowPath = histoFiles[dataPeriod][data_set].replace(
                     ".root", "-cutFlowAlt.txt")
-                altrawCutFlow = open("../PlotFiles/"+altcutFlowPath, "r")
+                altrawCutFlow = open(altcutFlowPath, "r")
                 altrawCutFlow_content = altrawCutFlow.read().split("\n")
 
                 for line in altrawCutFlow_content:
@@ -262,7 +273,7 @@ for btagStrategy in btagStrategies:
 significanceFile = open(outputdir + "/significance.txt", 'w')
 significanceFile.truncate(0)  # to ensure the file is empty
 significanceFile.write(
-    "HisogramName,"+",".join(signalMasses) + "\n")
+    "HisogramName," + "Region" + ",".join(signalMasses) + "\n")
 
 
 def calcSignificance(signalHisto, backgroundHisto):
@@ -361,16 +372,16 @@ for HistoName in histoNames:
             if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                 h_sig_Hplus_m400list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file1a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["sig_Hplus_Wh_m400-0"], "READ")
+                    file1a = TFile.Open(
+                        histoFiles["MC16a"]["sig_Hplus_Wh_m400-0"], "READ")
                     dir1a = file1a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m400a = dir1a.Get(
                         "sig_Hplus_Wh_m400-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_sig_Hplus_m400list.append(h_sig_Hplus_m400a)
                 if config["Stack_MC16d"] == "Enable":
-                    file1d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["sig_Hplus_Wh_m400-0"], "READ")
+                    file1d = TFile.Open(
+                        histoFiles["MC16d"]["sig_Hplus_Wh_m400-0"], "READ")
                     dir1d = file1d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m400d = dir1d.Get(
@@ -378,8 +389,8 @@ for HistoName in histoNames:
                     h_sig_Hplus_m400d.Scale(dscale)
                     h_sig_Hplus_m400list.append(h_sig_Hplus_m400d)
                 if config["Stack_MC16e"] == "Enable":
-                    file1e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["sig_Hplus_Wh_m400-0"], "READ")
+                    file1e = TFile.Open(
+                        histoFiles["MC16e"]["sig_Hplus_Wh_m400-0"], "READ")
                     dir1e = file1e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m400e = dir1e.Get(
@@ -396,16 +407,16 @@ for HistoName in histoNames:
             if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                 h_sig_Hplus_m800list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file2a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["sig_Hplus_Wh_m800-0"], "READ")
+                    file2a = TFile.Open(
+                        histoFiles["MC16a"]["sig_Hplus_Wh_m800-0"], "READ")
                     dir2a = file2a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m800a = dir2a.Get(
                         "sig_Hplus_Wh_m800-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_sig_Hplus_m800list.append(h_sig_Hplus_m800a)
                 if config["Stack_MC16d"] == "Enable":
-                    file2d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["sig_Hplus_Wh_m800-0"], "READ")
+                    file2d = TFile.Open(
+                        histoFiles["MC16d"]["sig_Hplus_Wh_m800-0"], "READ")
                     dir2d = file2d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m800d = dir2d.Get(
@@ -413,8 +424,8 @@ for HistoName in histoNames:
                     h_sig_Hplus_m800d.Scale(dscale)
                     h_sig_Hplus_m800list.append(h_sig_Hplus_m800d)
                 if config["Stack_MC16e"] == "Enable":
-                    file2e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["sig_Hplus_Wh_m800-0"], "READ")
+                    file2e = TFile.Open(
+                        histoFiles["MC16e"]["sig_Hplus_Wh_m800-0"], "READ")
                     dir2e = file2e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m800e = dir2e.Get(
@@ -431,16 +442,16 @@ for HistoName in histoNames:
             if config["Plot_sig_Hplus_Wh_m1600-0"] == "Enable":
                 h_sig_Hplus_m1600list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file3a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    file3a = TFile.Open(
+                        histoFiles["MC16a"]["sig_Hplus_Wh_m1600-0"], "READ")
                     dir3a = file3a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m1600a = dir3a.Get(
                         "sig_Hplus_Wh_m1600-0_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_sig_Hplus_m1600list.append(h_sig_Hplus_m1600a)
                 if config["Stack_MC16d"] == "Enable":
-                    file3d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    file3d = TFile.Open(
+                        histoFiles["MC16d"]["sig_Hplus_Wh_m1600-0"], "READ")
                     dir3d = file3d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m1600d = dir3d.Get(
@@ -448,8 +459,8 @@ for HistoName in histoNames:
                     h_sig_Hplus_m1600d.Scale(dscale)
                     h_sig_Hplus_m1600list.append(h_sig_Hplus_m1600d)
                 if config["Stack_MC16e"] == "Enable":
-                    file3e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["sig_Hplus_Wh_m1600-0"], "READ")
+                    file3e = TFile.Open(
+                        histoFiles["MC16e"]["sig_Hplus_Wh_m1600-0"], "READ")
                     dir3e = file3e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_sig_Hplus_m1600e = dir3e.Get(
@@ -467,16 +478,16 @@ for HistoName in histoNames:
             if config["Plot_ttbar"] == "Enable":
                 h_ttbar_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file4a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["ttbar"], "READ")
+                    file4a = TFile.Open(
+                        histoFiles["MC16a"]["ttbar"], "READ")
                     dir4a = file4a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbar_background_a = dir4a.Get(
                         "ttbar_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_ttbar_background_list.append(h_ttbar_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file4d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["ttbar"], "READ")
+                    file4d = TFile.Open(
+                        histoFiles["MC16d"]["ttbar"], "READ")
                     dir4d = file4d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbar_background_d = dir4d.Get(
@@ -484,8 +495,8 @@ for HistoName in histoNames:
                     h_ttbar_background_d.Scale(dscale)
                     h_ttbar_background_list.append(h_ttbar_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file4e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["ttbar"], "READ")
+                    file4e = TFile.Open(
+                        histoFiles["MC16e"]["ttbar"], "READ")
                     dir4e = file4e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbar_background_e = dir4e.Get(
@@ -501,8 +512,8 @@ for HistoName in histoNames:
             elif config["Plot_ttbarSherpa"] == "Enable":
                 h_ttbarSherpa_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file5a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["ttbarSherpa"], "READ")
+                    file5a = TFile.Open(
+                        histoFiles["MC16a"]["ttbarSherpa"], "READ")
                     dir5a = file5a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbarSherpa_background_a = dir5a.Get(
@@ -510,8 +521,8 @@ for HistoName in histoNames:
                     h_ttbarSherpa_background_list.append(
                         h_ttbarSherpa_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file5d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["ttbarSherpa"], "READ")
+                    file5d = TFile.Open(
+                        histoFiles["MC16d"]["ttbarSherpa"], "READ")
                     dir5d = file5d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbarSherpa_background_d = dir5d.Get(
@@ -520,8 +531,8 @@ for HistoName in histoNames:
                     h_ttbarSherpa_background_list.append(
                         h_ttbarSherpa_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file5e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["ttbarSherpa"], "READ")
+                    file5e = TFile.Open(
+                        histoFiles["MC16e"]["ttbarSherpa"], "READ")
                     dir5e = file5e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_ttbarSherpa_background_e = dir5e.Get(
@@ -539,16 +550,16 @@ for HistoName in histoNames:
             if config["Plot_Wjets"] == "Enable":
                 h_Wjets_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file6a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["Wjets"], "READ")
+                    file6a = TFile.Open(
+                        histoFiles["MC16a"]["Wjets"], "READ")
                     dir6a = file6a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Wjets_background_a = dir6a.Get(
                         "Wjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_Wjets_background_list.append(h_Wjets_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file6d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["Wjets"], "READ")
+                    file6d = TFile.Open(
+                        histoFiles["MC16d"]["Wjets"], "READ")
                     dir6d = file6d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Wjets_background_d = dir6d.Get(
@@ -556,8 +567,8 @@ for HistoName in histoNames:
                     h_Wjets_background_d.Scale(dscale)
                     h_Wjets_background_list.append(h_Wjets_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file6e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["Wjets"], "READ")
+                    file6e = TFile.Open(
+                        histoFiles["MC16e"]["Wjets"], "READ")
                     dir6e = file6e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Wjets_background_e = dir6e.Get(
@@ -574,16 +585,16 @@ for HistoName in histoNames:
             if config["Plot_Zjets"] == "Enable":
                 h_Zjets_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file7a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["Zjets"], "READ")
+                    file7a = TFile.Open(
+                        histoFiles["MC16a"]["Zjets"], "READ")
                     dir7a = file7a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Zjets_background_a = dir7a.Get(
                         "Zjets_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_Zjets_background_list.append(h_Zjets_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file7d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["Zjets"], "READ")
+                    file7d = TFile.Open(
+                        histoFiles["MC16d"]["Zjets"], "READ")
                     dir7d = file7d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Zjets_background_d = dir7d.Get(
@@ -591,8 +602,8 @@ for HistoName in histoNames:
                     h_Zjets_background_d.Scale(dscale)
                     h_Zjets_background_list.append(h_Zjets_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file7e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["Zjets"], "READ")
+                    file7e = TFile.Open(
+                        histoFiles["MC16e"]["Zjets"], "READ")
                     dir7e = file7e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_Zjets_background_e = dir7e.Get(
@@ -609,16 +620,16 @@ for HistoName in histoNames:
             if config["Plot_diboson"] == "Enable":
                 h_diboson_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file8a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["diboson"], "READ")
+                    file8a = TFile.Open(
+                        histoFiles["MC16a"]["diboson"], "READ")
                     dir8a = file8a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_diboson_background_a = dir8a.Get(
                         "diboson_"+HistoName+"_"+Region+"_"+btagStrategy+"_Nominal")
                     h_diboson_background_list.append(h_diboson_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file8d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["diboson"], "READ")
+                    file8d = TFile.Open(
+                        histoFiles["MC16d"]["diboson"], "READ")
                     dir8d = file8d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_diboson_background_d = dir8d.Get(
@@ -626,8 +637,8 @@ for HistoName in histoNames:
                     h_diboson_background_d.Scale(dscale)
                     h_diboson_background_list.append(h_diboson_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file8e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["diboson"], "READ")
+                    file8e = TFile.Open(
+                        histoFiles["MC16e"]["diboson"], "READ")
                     dir8e = file8e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_diboson_background_e = dir8e.Get(
@@ -644,8 +655,8 @@ for HistoName in histoNames:
             if config["Plot_singleTop"] == "Enable":
                 h_singleTop_background_list = []
                 if config["Stack_MC16a"] == "Enable":
-                    file9a = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16a"]["singleTop"], "READ")
+                    file9a = TFile.Open(
+                        histoFiles["MC16a"]["singleTop"], "READ")
                     dir9a = file9a.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_singleTop_background_a = dir9a.Get(
@@ -653,8 +664,8 @@ for HistoName in histoNames:
                     h_singleTop_background_list.append(
                         h_singleTop_background_a)
                 if config["Stack_MC16d"] == "Enable":
-                    file9d = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16d"]["singleTop"], "READ")
+                    file9d = TFile.Open(
+                        histoFiles["MC16d"]["singleTop"], "READ")
                     dir9d = file9d.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_singleTop_background_d = dir9d.Get(
@@ -663,8 +674,8 @@ for HistoName in histoNames:
                     h_singleTop_background_list.append(
                         h_singleTop_background_d)
                 if config["Stack_MC16e"] == "Enable":
-                    file9e = TFile.Open("../PlotFiles/" +
-                                        histoFiles["MC16e"]["singleTop"], "READ")
+                    file9e = TFile.Open(
+                        histoFiles["MC16e"]["singleTop"], "READ")
                     dir9e = file9e.GetDirectory(
                         "Nominal").GetDirectory(HistoName)
                     h_singleTop_background_e = dir9e.Get(
@@ -781,9 +792,9 @@ for HistoName in histoNames:
                 h_all_background.SetXTitle(Xaxis_label)
                 h_all_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_all_background.GetXaxis().SetRangeUser(0.001, 2400)
-                h_all_background.Draw("E1 HIST")
+                h_all_background.Draw("HIST")
                 if h_other_background_list != []:
-                    h_other_background.Draw("E1 HISTSAME")
+                    h_other_background.Draw("HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
@@ -795,7 +806,7 @@ for HistoName in histoNames:
                 h_other_background.SetXTitle(Xaxis_label)
                 h_other_background.GetYaxis().SetRangeUser(0.001, ymax*1.3)
                 h_other_background.GetXaxis().SetRangeUser(0.001, 2400)
-                h_other_background.Draw("E1 HIST")
+                h_other_background.Draw("HIST")
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400n.Draw("E1 HISTSAME")
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
@@ -857,5 +868,5 @@ for HistoName in histoNames:
             c1.SaveAs(histoDir + "/ShapePlot_%s.pdf" %
                       (HistoName+"_"+Region+"_"+btagStrategy))
         significanceFile.write(
-            HistoName + "," + ",".join(significanceValues) + "\n")
+            HistoName + "," + Region + "," + ",".join(significanceValues) + "\n")
 significanceFile.close()

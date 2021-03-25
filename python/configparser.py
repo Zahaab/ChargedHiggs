@@ -11,7 +11,6 @@ def configParser(path):
 
 # var is either Stack_ , Plot_ , Graph_ , Btag_ that give dataPeriodes, Plotting event catagories, Graph names, Btagging choice respectively.
 def getConfigData(config, var):
-    # print(config)
     ConfigData = [key.replace(
         var, "") for key in config if var in key and config[key] == "Enable"]
     return ConfigData

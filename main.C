@@ -57,6 +57,9 @@ int main(int argc, char **argv)
       OutFileName = OUTPUTDIR + "/PlotFiles/" + OutFileName;
     }
 
+    std::cout << OutFileName << "\n"
+              << path << "\n";
+
     TFile *outfile = TFile::Open(OutFileName, "RECREATE");
     for (unsigned int i = 0; i < TreeNames.size(); i++)
     {
@@ -65,7 +68,7 @@ int main(int argc, char **argv)
       TChain *mych_data = new TChain(TreeName);
       // This adds the absolute path of the sampleName file to
       // the Tchain
-      mych_data->Add(OUTPUTDIR + "/" + path + "/" + SampleName);
+      mych_data->Add(path + "/" + SampleName);
       // This prints GetEntries from the Tchain to the terminal
       std::cout << mych_data->GetEntries() << "  " << path + "/" + SampleName << std::endl;
       EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
