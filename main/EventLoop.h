@@ -114,7 +114,7 @@ public:
    TBranch *b_TrackJet_M;            //!
    TBranch *b_TrackJet_btagWeight;   //!
 
-   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "", int EventReadout = 0,
+   EventLoop(TTree *tree = 0, TString sampleName = "", TString ExpUncertaintyName = "Nominal", TString WP = "",
              bool flatCutFlow = true, bool realCutFlow = true, bool flatAltCutFlow = false, bool realAltCutFlow = false,
              Float_t hmlb = 90., Float_t hmub = 140., Float_t wmlb = 70., Float_t wmub = 100., Float_t met_ptv = 30000.,
              Float_t lep_ptv = 30000., Float_t jet0_ptv = 200000., Float_t jet1_ptv = 200000., Float_t lep_jet0_angle = 1.0,
@@ -155,7 +155,7 @@ public:
    virtual Int_t GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void Init(TTree *tree, TString sampleName, TString ExpUncertaintyName);
-   virtual void Loop();
+   virtual void analyseEvent();
    virtual Bool_t Notify();
    virtual void Show(Long64_t entry = -1);
 
@@ -277,7 +277,6 @@ public:
    Float_t lep_jet1_angle = 1.0;
    Float_t hw_angle = 2.5;
    Float_t solo_jet_ptv = 250000.;
-   int EventReadout = 0;
    bool flatCutFlow = true;
    bool realCutFlow = true;
    bool flatAltCutFlow = false;
@@ -404,10 +403,6 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
    {
       solo_jet_ptv = std::stof(config["1Jet_Jet_transverse_momentum"]);
    }
-   if (config["EventReadout"] != "")
-   {
-      EventReadout = std::stoi(config["EventReadout"]);
-   }
    if (config["FlatCutFlow"] != "")
    {
       if (config["FlatCutFlow"] == "Enable" || config["FlatCutFlow"] == "enable")
@@ -496,7 +491,7 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
    Init(tree, SampleName, ExpUncertaintyName);
 }
 
-EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, int EventReadout, bool flatCutFlow,
+EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, bool flatCutFlow,
                      bool realCutFlow, bool flatAltCutFlow, bool realAltCutFlow, Float_t hmlb, Float_t hmub, Float_t wmlb,
                      Float_t wmub, Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle,
                      Float_t lep_jet1_angle, Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
@@ -866,7 +861,7 @@ void EventLoop::Show(Long64_t entry)
 }
 Int_t EventLoop::Cut(Long64_t entry)
 {
-   // This function may be called from Loop.
+   // This function may be called from analyseEvent.
    // returns  1 if entry is accepted.
    // returns -1 otherwise.
    return 1;

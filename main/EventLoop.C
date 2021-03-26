@@ -7,161 +7,136 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-void EventLoop::Loop()
+void EventLoop::analyseEvent()
 {
-    if (fChain == 0)
-        return;
-    // This takes the entries from fchain, fchain is set up in the "main.C" file. These entries are event data, each entry is 1 collition.
-    Long64_t nentries = fChain->GetEntriesFast();
-    Long64_t nbytes = 0, nb = 0;
-    for (Long64_t jentry = 0; jentry < nentries; jentry++)
+    // This for analyseEvent takes each collition in the form of a tree data structure. After initilising the tags of the Higgs and 2 other tags I don't know yet, this code selects the jet's that may
+    // contain the higgs though numerous methods that identify the expected value against the value seen.
+    for (auto sel : mySel)
     {
-        // This for loop takes each collition in the form of a tree data structure. After initilising the tags of the Higgs and 2 other tags I don't know yet, this code selects the jet's that may
-        // contain the higgs though numerous methods that identify the expected value against the value seen.
-        Long64_t ientry = LoadTree(jentry);
-        if (ientry < 0)
-            break;
-        nb = fChain->GetEntry(jentry);
-        nbytes += nb;
-        if (EventReadout != 0)
+        pass_sel[sel] = false;
+    }
+
+    m_NTags = 0;
+    m_NTags_caloJ = 0;
+    m_NTags_trkJ = 0;
+    m_NTags_Higgs = 0;
+    m_ntagsOutside = 0;
+    m_MassTruth = 0;
+    m_EventWeights.clear();
+    m_EventWeights.push_back(EventWeight);
+
+    SetJetVectors();
+    bool status_W = false;
+    bool status = false;
+    m_mWT = GetMwt();
+    m_MassTruth = GetTruthMass();
+    Wminus = GetWBoson(status_W);
+
+    // Key: Positively or a negatively charged lepton (LepN or LepP), a fat jet ("Merged"),  slimmer jets ("resolved"), background-enriched ("CR"), signal enriched ("SR").
+    // This bool ensures that fat or slim jets are passed
+
+    bool passed_merged_preselection = PassEventSelectionBoosted(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv);
+    // bool passed_resovled_preselction = PassEventSelectionResolved();
+    bool passed_resovled_preselction = false; // My serch is only on the boosted channel
+    if (!passed_merged_preselection && !passed_resovled_preselction)
+        return;
+
+    if (Jets.size() >= 4 && Lepton_Charge < 0)
+    {
+        MatchTruthParticlesToJets();
+    }
+
+    if (passed_merged_preselection)
+    {
+        if (Lepton_Charge > 0)
         {
-            if (jentry % EventReadout == 0)
+            if ((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
             {
-                std::cout << "Processing " << jentry << " events!!!" << std::endl;
-                std::cout << "Data : " << nbytes << " Bytes"
-                          << "\n"
-                          << "Data : " << nbytes * 0.000000001 << " Gigabytes"
-                          << "\n";
+                pass_sel["Merged_LepP_SR"] = true;
+            }
+            if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
+            {
+                pass_sel["Merged_LepP_CR"] = true;
+                CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
             }
         }
-
-        for (auto sel : mySel)
+        else if (Lepton_Charge < 0)
         {
-            pass_sel[sel] = false;
-        }
-
-        m_NTags = 0;
-        m_NTags_caloJ = 0;
-        m_NTags_trkJ = 0;
-        m_NTags_Higgs = 0;
-        m_ntagsOutside = 0;
-        m_MassTruth = 0;
-        m_EventWeights.clear();
-        m_EventWeights.push_back(EventWeight);
-
-        SetJetVectors();
-        bool status_W = false;
-        bool status = false;
-        m_mWT = GetMwt();
-        m_MassTruth = GetTruthMass();
-        Wminus = GetWBoson(status_W);
-
-        // Key: Positively or a negatively charged lepton (LepN or LepP), a fat jet ("Merged"),  slimmer jets ("resolved"), background-enriched ("CR"), signal enriched ("SR").
-        // This bool ensures that fat or slim jets are passed
-
-        bool passed_merged_preselection = PassEventSelectionBoosted(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv);
-        // bool passed_resovled_preselction = PassEventSelectionResolved();
-        bool passed_resovled_preselction = false; // My serch is only on the boosted channel
-        if (!passed_merged_preselection && !passed_resovled_preselction)
-            continue;
-
-        if (Jets.size() >= 4 && Lepton_Charge < 0)
-        {
-            MatchTruthParticlesToJets();
-        }
-
-        if (passed_merged_preselection)
-        {
-            if (Lepton_Charge > 0)
+            if (((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
             {
-                if ((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
-                {
-                    pass_sel["Merged_LepP_SR"] = true;
-                }
+                pass_sel["Merged_LepN_SR"] = true;
+            }
+            if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
+            {
+                pass_sel["Merged_LepN_CR"] = true;
                 if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
                 {
-                    pass_sel["Merged_LepP_CR"] = true;
                     CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
                 }
-            }
-            else if (Lepton_Charge < 0)
-            {
-                if (((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
+                else if (!(Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub))
                 {
-                    pass_sel["Merged_LepN_SR"] = true;
-                }
-                if (!((Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub) && (Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub)))
-                {
-                    pass_sel["Merged_LepN_CR"] = true;
-                    if (!(Higgs.M() * 0.001 > hmlb && Higgs.M() * 0.001 < hmub))
-                    {
-                        CutFlowAssignment(m_HiggsMassCutFlow, flatCutFlow, realCutFlow);
-                    }
-                    else if (!(Wplus.M() * 0.001 > wmlb && Wplus.M() * 0.001 < wmub))
-                    {
-                        CutFlowAssignment(m_WplusMassCutFlow, flatCutFlow, realCutFlow);
-                    }
+                    CutFlowAssignment(m_WplusMassCutFlow, flatCutFlow, realCutFlow);
                 }
             }
         }
-
-        if (passed_resovled_preselction && !pass_sel["Merged_LepP_SR"] && !pass_sel["Merged_LepN_SR"])
-        {
-            if (Lepton_Charge > 0)
-            {
-                if (m_MaxMVA_Response > 0.7)
-                {
-                    pass_sel["Resolved_LepP_SR"] = true;
-                    if (pass_sel["Merged_LepP_CR"] == true)
-                        pass_sel["Merged_LepP_CR"] = false;
-                }
-                if (!pass_sel["Merged_LepP_CR"] && m_MaxMVA_Response > -0.5 && m_MaxMVA_Response < 0.3)
-                    pass_sel["Resolved_LepP_CR"] = true;
-            }
-            else if (Lepton_Charge < 0)
-            {
-                if (m_MaxMVA_Response > -2.0)
-                {
-                    pass_sel["Resolved_LepN_SR"] = true;
-                    if (pass_sel["Merged_LepN_CR"] == true)
-                        pass_sel["Merged_LepN_CR"] = false;
-                }
-                if (!pass_sel["Merged_LepN_CR"] && m_MaxMVA_Response < 0.5)
-                    pass_sel["Resolved_LepN_CR"] = true;
-            }
-        }
-
-        if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
-        {
-            // h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
-            // h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
-            // h_Lepton_Pt->Fill(Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_NBtags->Fill(m_NTags, m_EventWeights, pass_sel, m_NTags);
-            // h_Njets->Fill(Jets.size(), m_EventWeights, pass_sel, m_NTags);
-            // h_NFjets->Fill(FJets.size(), m_EventWeights, pass_sel, m_NTags);
-            // h_Mwt->Fill(m_mWT, m_EventWeights, pass_sel, m_NTags);
-            // h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
-            // h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
-            // h_HT_bjets->Fill(m_HT_bjets, m_EventWeights, pass_sel, m_NTags);
-            // h_HT_bjets_Lepton_Pt->Fill(m_HT_bjets + (Lepton4vector->Pt() * 0.001), m_EventWeights, pass_sel, m_NTags);
-            // h_pTWminus->Fill(Wminus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            h_mVH->Fill(m_mVH, m_EventWeights, pass_sel, m_NTags);
-            // h_DeltaPhi_HW->Fill(m_DeltaPhi_HW, m_EventWeights, pass_sel, m_NTags);
-            // h_maxMVAResponse->Fill(m_MaxMVA_Response, m_EventWeights, pass_sel, m_NTags);
-            // h_pTH->Fill(Higgs.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_pTWplus->Fill(Wplus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_pTH_over_mVH->Fill(Higgs.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
-            // h_pTW_over_mVH->Fill(Wplus.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
-            // h_mH->Fill(Higgs.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_mWplus->Fill(Wplus.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
-            // h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
-            // h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
-            // h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
-            // h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
-        }
-        //WriteMVAInput();
     }
+
+    if (passed_resovled_preselction && !pass_sel["Merged_LepP_SR"] && !pass_sel["Merged_LepN_SR"])
+    {
+        if (Lepton_Charge > 0)
+        {
+            if (m_MaxMVA_Response > 0.7)
+            {
+                pass_sel["Resolved_LepP_SR"] = true;
+                if (pass_sel["Merged_LepP_CR"] == true)
+                    pass_sel["Merged_LepP_CR"] = false;
+            }
+            if (!pass_sel["Merged_LepP_CR"] && m_MaxMVA_Response > -0.5 && m_MaxMVA_Response < 0.3)
+                pass_sel["Resolved_LepP_CR"] = true;
+        }
+        else if (Lepton_Charge < 0)
+        {
+            if (m_MaxMVA_Response > -2.0)
+            {
+                pass_sel["Resolved_LepN_SR"] = true;
+                if (pass_sel["Merged_LepN_CR"] == true)
+                    pass_sel["Merged_LepN_CR"] = false;
+            }
+            if (!pass_sel["Merged_LepN_CR"] && m_MaxMVA_Response < 0.5)
+                pass_sel["Resolved_LepN_CR"] = true;
+        }
+    }
+
+    if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
+    {
+        // h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
+        // h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
+        // h_Lepton_Pt->Fill(Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_NBtags->Fill(m_NTags, m_EventWeights, pass_sel, m_NTags);
+        // h_Njets->Fill(Jets.size(), m_EventWeights, pass_sel, m_NTags);
+        // h_NFjets->Fill(FJets.size(), m_EventWeights, pass_sel, m_NTags);
+        // h_Mwt->Fill(m_mWT, m_EventWeights, pass_sel, m_NTags);
+        // h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
+        // h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
+        // h_HT_bjets->Fill(m_HT_bjets, m_EventWeights, pass_sel, m_NTags);
+        // h_HT_bjets_Lepton_Pt->Fill(m_HT_bjets + (Lepton4vector->Pt() * 0.001), m_EventWeights, pass_sel, m_NTags);
+        // h_pTWminus->Fill(Wminus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_mVH->Fill(m_mVH, m_EventWeights, pass_sel, m_NTags);
+        // h_DeltaPhi_HW->Fill(m_DeltaPhi_HW, m_EventWeights, pass_sel, m_NTags);
+        // h_maxMVAResponse->Fill(m_MaxMVA_Response, m_EventWeights, pass_sel, m_NTags);
+        // h_pTH->Fill(Higgs.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_pTWplus->Fill(Wplus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_pTH_over_mVH->Fill(Higgs.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
+        // h_pTW_over_mVH->Fill(Wplus.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
+        // h_mH->Fill(Higgs.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_mWplus->Fill(Wplus.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        // h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
+        // h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
+        // h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
+        // h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
+    }
+    //WriteMVAInput();
 }
 
 int EventLoop::GetBTagCategoryShort(int NTags_InHiggsJet, int NTags_OutsideHiggsJet)
