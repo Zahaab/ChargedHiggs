@@ -25,12 +25,13 @@ int main(int argc, char **argv)
   TString SampleName = config["SampleName"];
   TString WP = config["WP"];
   TString OUTPUTDIR = config["OUTPUTDIR"];
-  int EventReadout = stoi(config["EventReadout"]);
+  //int EventReadout = stoi(config["EventReadout"]);
+  int EventReadout = 2000;
   bool batchMode = atoi(config["batchMode"].c_str());
   // This is where we initialise TreeNames as an empty vector of
   // strings.
   TString TreeName = TString("Nominal");
-  Long64_t memoryLimit = 15000000; // 1000000000 = 1 Gigabyte, 1 = 1 Byte
+  Long64_t memoryLimit = 30000000; // 1000000000 = 1 Gigabyte, 1 = 1 Byte
 
   std::string stdpath = config["path"];
   auto MCDataPeriodes = parseDataPeriodes(config);
@@ -43,6 +44,8 @@ int main(int argc, char **argv)
 
   for (auto stdMCDataPeriode : MCDataPeriodes)
   {
+    std::cout << "\n"
+              << "Working 1, data period : " << stdMCDataPeriode << "\n";
     path = TString(stdpath.replace(index, 5, stdMCDataPeriode));
     MCDataPeriode = TString(stdMCDataPeriode);
     TString OutFileName = SampleName;
@@ -53,6 +56,8 @@ int main(int argc, char **argv)
                                         config["Lepton_transverse_momentum"] + "-" + config["2Jets_Jet1_transverse_momentum"] + "-" +
                                         config["2Jets_Jet2_transverse_momentum"] + "-" + config["2Jets_Jet1_lepton_angle"] + "-" + config["2Jets_Jet2_lepton_angle"] + "-" +
                                         config["Higgs_Wboson_angle"] + "-" + config["1Jet_Jet_transverse_momentum"] + ".root");
+    std::cout << "\n"
+              << "Working 2, OutFileName : " << OutFileName << "\n";
     if (!batchMode)
     {
       OutFileName = OUTPUTDIR + "/PlotFiles/" + OutFileName;
@@ -61,8 +66,9 @@ int main(int argc, char **argv)
     TFile *outfile = TFile::Open(OutFileName, "RECREATE");
     TChain *mych_data = new TChain(TreeName);
     mych_data->Add(path + "/" + SampleName);
+    std::cout << "\n"
+              << mych_data->GetEntries() << "  " << path + "/" + SampleName << "\n";
     EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
-    std::cout << mych_data->GetEntries() << "  " << path + "/" + SampleName << std::endl;
 
     if (mych_data == 0)
       continue;
@@ -70,18 +76,42 @@ int main(int argc, char **argv)
     Long64_t nentries = mych_data->GetEntriesFast();
     Long64_t nbytes = 0, nb = 0;
     int file_number = 0;
+    std::cout << "\n"
+              << "Working 3, nentries : " << nentries << "\n";
     for (Long64_t jentry = 0; jentry < nentries; jentry++)
     {
+      if (nbytes == 0)
+      {
+        std::cout << "\n"
+                  << "Working 4, nentries : " << nentries << "\n";
+      }
+
       Long64_t ientry = eventLoop->LoadTree(jentry);
-      if (ientry < 0)
+      if (nbytes == 0)
+      {
+        std::cout << "\n"
+                  << "Working 5, ientry : " << ientry << "\n";
+      }
+      if (ientry < 0 || !mych_data)
         break;
+      if (nbytes == 0)
+      {
+        std::cout << "\n"
+                  << "Working 6, ientry : " << ientry << "\n";
+      }
       nb = mych_data->GetEntry(jentry);
+      if (nbytes == 0)
+      {
+        std::cout << "\n"
+                  << "Working 7, ientry : " << ientry << "\n";
+      }
       nbytes += nb;
       if (EventReadout != 0)
       {
         if (jentry % EventReadout == 0)
         {
-          std::cout << "Processing " << jentry << " events!!!" << std::endl;
+          std::cout << "Processing " << jentry << " events!!!"
+                    << "\n";
           std::cout << "Data : " << nbytes << " Bytes"
                     << "\n"
                     << "Data : " << nbytes * 0.000000001 << " Gigabytes"
@@ -91,28 +121,63 @@ int main(int argc, char **argv)
 
       eventLoop->analyseEvent();
 
-      if (nbytes > memoryLimit)
+      if (memoryLimit != 0)
       {
-        std::string my_dir = std::string(TreeName);
-        TDirectory *subdir = outfile->mkdir(my_dir.c_str());
-        eventLoop->Write(subdir, std::string(TreeName));
-        delete eventLoop;
-        delete mych_data;
-        outfile->Close();
-        ++file_number;
-        std::string file_extention = std::to_string(file_number);
-        std::string ex_OutFileName = std::string(OutFileName) + "_" + file_extention;
-        outfile = TFile::Open(ex_OutFileName.c_str(), "RECREATE");
-        TChain *mych_data = new TChain(TreeName);
-        mych_data->Add(path + "/" + SampleName);
-        eventLoop = new EventLoop(mych_data, TreeName, ex_OutFileName, config);
-        std::cout << "New output File " << ex_OutFileName << "\n";
-        nbytes = 0;
+        if (nbytes > memoryLimit)
+        {
+          std::cout << "\n"
+                    << "Working 8"
+                    << "\n";
+          std::string my_dir = std::string(TreeName);
+          TDirectory *subdir = outfile->mkdir(my_dir.c_str());
+          eventLoop->Write(subdir, std::string(TreeName));
+          std::cout << "\n"
+                    << "Working 9"
+                    << "\n";
+          delete eventLoop;
+          std::cout << "\n"
+                    << "Working 10"
+                    << "\n";
+          delete mych_data;
+          std::cout << "\n"
+                    << "Working 11"
+                    << "\n";
+          outfile->Close();
+          std::cout << "\n"
+                    << "Working 12"
+                    << "\n";
+          ++file_number;
+          std::string file_extention = +"_" + std::to_string(file_number) + ".root";
+          std::string ex_OutFileName = std::string(OutFileName);
+          ex_OutFileName.replace(ex_OutFileName.end() - 5, ex_OutFileName.end(), file_extention);
+          outfile = TFile::Open(ex_OutFileName.c_str(), "RECREATE");
+          mych_data = new TChain(TreeName);
+          mych_data->Add(path + "/" + SampleName);
+          eventLoop = new EventLoop(mych_data, TreeName, ex_OutFileName, config);
+          std::cout << "\n"
+                    << "New output File " << ex_OutFileName << "\n";
+          nbytes = 0;
+        }
       }
     }
+    std::cout << "\n"
+              << "Working 13"
+              << "\n";
+    std::string my_dir = std::string(TreeName);
+    TDirectory *subdir = outfile->mkdir(my_dir.c_str());
+    eventLoop->Write(subdir, std::string(TreeName));
+    std::cout << "\n"
+              << "Working 14"
+              << "\n";
     delete eventLoop;
-    outfile->Close();
+    std::cout << "\n"
+              << "Working 15"
+              << "\n";
     delete mych_data;
+    std::cout << "\n"
+              << "Working 16"
+              << "\n";
+    outfile->Close();
     // This prints GetEntries from the Tchain to the terminal
     std::cout << "Finished looping over the events" << std::endl;
   }

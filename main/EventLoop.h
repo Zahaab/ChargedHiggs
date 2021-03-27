@@ -766,7 +766,6 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    // if (!tree)
    //    return;
    // fChain = tree;
-   // fChain->SetCacheSize(1000000LL);
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
