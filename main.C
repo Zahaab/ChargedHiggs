@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   // This is where we initialise TreeNames as an empty vector of
   // strings.
   TString TreeName = TString("Nominal");
-  Long64_t memoryLimit = 1000000000; // 1000000000 = 1 Gigabyte, 1 = 1 Byte
+  Long64_t memoryLimit = 15000000; // 1000000000 = 1 Gigabyte, 1 = 1 Byte
 
   std::string stdpath = config["path"];
   auto MCDataPeriodes = parseDataPeriodes(config);
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
 
     TFile *outfile = TFile::Open(OutFileName, "RECREATE");
     TChain *mych_data = new TChain(TreeName);
-    EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
     mych_data->Add(path + "/" + SampleName);
+    EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
     std::cout << mych_data->GetEntries() << "  " << path + "/" + SampleName << std::endl;
 
     if (mych_data == 0)
@@ -75,7 +75,6 @@ int main(int argc, char **argv)
       Long64_t ientry = eventLoop->LoadTree(jentry);
       if (ientry < 0)
         break;
-
       nb = mych_data->GetEntry(jentry);
       nbytes += nb;
       if (EventReadout != 0)
@@ -98,11 +97,14 @@ int main(int argc, char **argv)
         TDirectory *subdir = outfile->mkdir(my_dir.c_str());
         eventLoop->Write(subdir, std::string(TreeName));
         delete eventLoop;
+        delete mych_data;
         outfile->Close();
         ++file_number;
         std::string file_extention = std::to_string(file_number);
         std::string ex_OutFileName = std::string(OutFileName) + "_" + file_extention;
         outfile = TFile::Open(ex_OutFileName.c_str(), "RECREATE");
+        TChain *mych_data = new TChain(TreeName);
+        mych_data->Add(path + "/" + SampleName);
         eventLoop = new EventLoop(mych_data, TreeName, ex_OutFileName, config);
         std::cout << "New output File " << ex_OutFileName << "\n";
         nbytes = 0;

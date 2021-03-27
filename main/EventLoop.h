@@ -347,7 +347,7 @@ public:
 
 #ifdef EventLoop_cxx
 
-EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileName, std::unordered_map<std::string, std::string> config) : fChain(0)
+EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileName, std::unordered_map<std::string, std::string> config) : fChain(tree)
 {
    if (tree == 0)
    {
@@ -494,7 +494,7 @@ EventLoop::EventLoop(TTree *tree, TString ExpUncertaintyName, TString outFileNam
 EventLoop::EventLoop(TTree *tree, TString sampleName, TString ExpUncertaintyName, TString WP, bool flatCutFlow,
                      bool realCutFlow, bool flatAltCutFlow, bool realAltCutFlow, Float_t hmlb, Float_t hmub, Float_t wmlb,
                      Float_t wmub, Float_t met_ptv, Float_t lep_ptv, Float_t jet0_ptv, Float_t jet1_ptv, Float_t lep_jet0_angle,
-                     Float_t lep_jet1_angle, Float_t hw_angle, Float_t solo_jet_ptv) : fChain(0),
+                     Float_t lep_jet1_angle, Float_t hw_angle, Float_t solo_jet_ptv) : fChain(tree),
                                                                                        hmlb(hmlb),
                                                                                        hmub(hmub),
                                                                                        wmlb(wmlb),
@@ -655,6 +655,7 @@ Int_t EventLoop::GetEntry(Long64_t entry)
 Long64_t EventLoop::LoadTree(Long64_t entry)
 {
    // Set the environment to read one entry
+
    if (!fChain)
       return -5;
    Long64_t centry = fChain->LoadTree(entry);
@@ -762,9 +763,9 @@ void EventLoop::Init(TTree *tree, TString sampleName, TString ExpUncertaintyName
    TrackJet_M = 0;
    TrackJet_btagWeight = 0;
    // Set branch addresses and branch pointers
-   if (!tree)
-      return;
-   fChain = tree;
+   // if (!tree)
+   //    return;
+   // fChain = tree;
    // fChain->SetCacheSize(1000000LL);
    fCurrent = -1;
    fChain->SetMakeClass(1);
