@@ -9,9 +9,55 @@ def prepareCutHolder(cutHolder, cutParameters, btagStrategies):
     return cutHolder
 
 
+def prepareCutContent(cutParameters):
+    cutFlow_content1 = {}
+    cutFlow_content2 = {}
+    for parameter in cutParameters:
+        cutFlow_content1[parameter] = {}
+        cutFlow_content2[parameter] = {}
+        for channel in ["jjbb", "lvbb"]:
+            cutFlow_content1[parameter][channel] = []
+            cutFlow_content2[parameter][channel] = []
+    return cutFlow_content1, cutFlow_content2
+
+
+def sortCutContent(inputContent, realOutputContent, flatOutputContent):
+    for line in inputContent:
+        if line == "":
+            continue
+        parameter, raw_content = line.split("=")
+        if parameter[-9:] == "noFatJets":
+            continue
+        if line[0:4] == "real":
+            realOutputContent[parameter]["jjbb"] = raw_content.split("|")[0]
+            realOutputContent[parameter]["lvbb"] = raw_content.split("|")[1]
+        else:
+            flatOutputContent[parameter]["jjbb"] = raw_content.split("|")[0]
+            flatOutputContent[parameter]["lvbb"] = raw_content.split("|")[1]
+    return realOutputContent, flatOutputContent
+
+
+def addCutFlows(cutFlow1, cutFlow2):
+    for parameter in cutFlow1:
+        jjbb_values1 = cutFlow1[parameter]["jjbb"].split(",")
+        jjbb_values2 = cutFlow2[parameter]["jjbb"].split(",")
+        lvbb_values1 = cutFlow1[parameter]["lvbb"].split(",")
+        lvbb_values2 = cutFlow2[parameter]["lvbb"].split(",")
+        jjbb_sum = []
+        lvbb_sum = []
+        for i, j in enumerate(jjbb_values1):
+            jjbb_sum.append(
+                str(float(jjbb_values1[i]) + float(jjbb_values2[i])))
+            lvbb_sum.append(
+                str(float(lvbb_values1[i]) + float(lvbb_values2[i])))
+        cutFlow1[parameter]["jjbb"] = ",".join(jjbb_sum)
+        cutFlow1[parameter]["lvbb"] = ",".join(lvbb_sum)
+    return cutFlow1
+
+
 def cutFlowExtraction(content, cutParameters, btagStrategies, cutHolder):
-    for index, parameter in enumerate(cutParameters):
-        jjbb_values, lvbb_values = content[index].split("=")[1].split("|")
+    for parameter in cutParameters:
+        jjbb_values, lvbb_values = content[parameter]["jjbb"], content[parameter]["lvbb"]
         for tagged_values in [(jjbb_values.split(","), "jjbb"), (lvbb_values.split(","), "lvbb")]:
             if tagged_values[0][-1] == "0":  # Some cut parameters don't cut anything
                 for btagStrategy in btagStrategies:
@@ -30,8 +76,8 @@ def cutFlowExtraction(content, cutParameters, btagStrategies, cutHolder):
 
 def cutFlowPercentExtraction(content, cutParameters, btagStrategies, cutHolder):
     total_events = []
-    for index, parameter in enumerate(cutParameters):
-        jjbb_values, lvbb_values = content[index].split("=")[1].split("|")
+    for parameter in cutParameters:
+        jjbb_values, lvbb_values = content[parameter]["jjbb"], content[parameter]["lvbb"]
         for tagged_values in [(jjbb_values.split(","), "jjbb"), (lvbb_values.split(","), "lvbb")]:
             if tagged_values[0][-1] == "0":  # Some cut parameters don't cut anythign
                 for btagStrategy in btagStrategies:
