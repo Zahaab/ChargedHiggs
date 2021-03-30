@@ -30,16 +30,16 @@ else:
 for data_set in plotEvents:
     for dataPeriode in MCDataPeriodes:
         histoFiles[dataPeriode][data_set] = [input_dir + "/" +
-                                             "PlotFiles/" + histoFiles[dataPeriode][data_set]]
+                                             "PlotFiles/" + histoFiles[dataPeriode][data_set].replace(".root", "_0.root")]
         fileExtention = 1
         extraHisto = histoFiles[dataPeriode][data_set][0].replace(
-            ".root", "_" + str(fileExtention) + ".root")
+            "_0.root", "_" + str(fileExtention) + ".root")
         plotDataExists = os.path.exists(extraHisto)
         while plotDataExists == True:
             histoFiles[dataPeriode][data_set].append(extraHisto)
             fileExtention += 1
             extraHisto = histoFiles[dataPeriode][data_set][0].replace(
-                ".root", "_" + str(fileExtention) + ".root")
+                "_0.root", "_" + str(fileExtention) + ".root")
             plotDataExists = os.path.exists(extraHisto)
 
 
@@ -168,7 +168,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
                 altrealCutParameters)
 
             cutFlowPath = histoFiles[dataPeriod][data_set][0].replace(
-                ".root", "-cutFlow.txt")
+                "_0.root", "-cutFlow.txt")
             rawCutFlow = open(cutFlowPath, "r")
             rawCutFlow_content = rawCutFlow.read().split("\n")
             realCutFlow_content, cutFlow_content = sortCutContent(
@@ -194,7 +194,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
 
             if config["CSV_AlternateCutFlow"] == "Enable":
                 altcutFlowPath = histoFiles[dataPeriod][data_set][0].replace(
-                    ".root", "-cutFlowAlt.txt")
+                    "_0.root", "-cutFlowAlt.txt")
                 altrawCutFlow = open(altcutFlowPath, "r")
                 altrawCutFlow_content = altrawCutFlow.read().split("\n")
                 altrealCutFlow_content, altcutFlow_content = sortCutContent(
@@ -353,52 +353,37 @@ def sumHistosList(histo_list):
             if resultHisto == 0:
                 resultHisto = i
             else:
-                resultHisto.Add(resultHisto, i, 1.0, 1.0)
+                resultHisto.Add(i, 1.0)
     return resultHisto
 
 
 def getHistos(data_set, histo_list, histoName, region, btagStrategy, histoFiles):
     if config["Stack_MC16a"] == "Enable":
-        MC16aHistos = []
+        MC16aHisto = TH1F()
         for histo in histoFiles["MC16a"][data_set]:
-            print histo
             filea = TFile.Open(
                 histo, "READ")
             dira = filea.GetDirectory(
                 "Nominal").GetDirectory(histoName)
             histoa = dira.Get(
                 data_set+"_"+histoName+"_"+region+"_"+btagStrategy+"_Nominal")
-            print histoa.Integral(0, 30)
-            MC16aHistos.append(histoa)
-        print "\n"
-        for histoa in MC16aHistos:
-            print histoa
-            histoa.Integral(0, 30)
-        print "\n"
-        histoMC16a = sumHistosList(MC16aHistos)
-        histo_list.append(histoMC16a)
+            MC16aHisto.Add(histoa, 1.0)
+        histo_list.append(MC16aHisto)
     if config["Stack_MC16d"] == "Enable":
-        MC16dHistos = []
+        MC16dHisto = TH1F()
         for histo in histoFiles["MC16d"][data_set]:
-            print histo
+
             filed = TFile.Open(
                 histo, "READ")
             dird = filed.GetDirectory(
                 "Nominal").GetDirectory(histoName)
             histod = dird.Get(
                 data_set+"_"+histoName+"_"+region+"_"+btagStrategy+"_Nominal")
-            print histod.Integral(0, 30)
-            MC16dHistos.append(histod)
-        # print "\n"
-        # for histod in MC16dHistos:
-        #     print histod
-        # print "\n"
-        raise
-        histoMC16d = sumHistosList(MC16dHistos)
-        histoMC16d.Scale(dscale)
-        histo_list.append(histoMC16d)
+            MC16dHisto.Add(histod, 1.0)
+        MC16dHisto.Scale(dscale)
+        histo_list.append(MC16dHisto)
     if config["Stack_MC16e"] == "Enable":
-        MC16eHistos = []
+        MC16eHisto = TH1F()
         for histo in histoFiles["MC16d"][data_set]:
             filee = TFile.Open(
                 histo, "READ")
@@ -406,10 +391,9 @@ def getHistos(data_set, histo_list, histoName, region, btagStrategy, histoFiles)
                 "Nominal").GetDirectory(histoName)
             histoe = dire.Get(
                 data_set+"_"+histoName+"_"+region+"_"+btagStrategy+"_Nominal")
-            MC16eHistos.append(histoe)
-        histoMC16e = sumHistosList(MC16eHistos)
-        histoMC16e.Scale(escale)
-        histo_list.append(histoMC16e)
+            MC16eHisto.Add(histoe, 1.0)
+        MC16eHisto.Scale(escale)
+        histo_list.append(MC16eHisto)
     return histo_list
 
 
@@ -575,7 +559,7 @@ for HistoName in histoNames:
             if h_all_background == 0:
                 if config["Plot_sig_Hplus_Wh_m400-0"] == "Enable":
                     h_sig_Hplus_m400.Scale(5)
-                    h_sig_Hplus_m400n = h_sig_Hplus_m400d
+                    h_sig_Hplus_m400n = h_sig_Hplus_m400
                 if config["Plot_sig_Hplus_Wh_m800-0"] == "Enable":
                     h_sig_Hplus_m800.Scale(5)
                     h_sig_Hplus_m800n = h_sig_Hplus_m800
