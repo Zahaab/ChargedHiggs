@@ -27,10 +27,9 @@ int main(int argc, char **argv)
   TString OUTPUTDIR = config["OUTPUTDIR"];
   int EventReadout = stoi(config["EventReadout"]);
   bool batchMode = atoi(config["batchMode"].c_str());
-  // Long64_t minEvent = stoi(config["minEvent"]);
-  // Long64_t maxEvent = stoi(config["maxEvent"]);
-  Long64_t minEvent = 0;
-  Long64_t maxEvent = 10;
+  Long64_t minEvent = stoi(config["MinimumEvent"]);
+  Long64_t maxEvent = stoi(config["MaximumEvent"]);
+  std::string file_number = config["Partition"];
   TString TreeName = TString("Nominal");
 
   std::string stdpath = config["path"];
@@ -60,8 +59,7 @@ int main(int argc, char **argv)
     {
       OutFileName = OUTPUTDIR + "/PlotFiles/" + OutFileName;
     }
-    int file_number = 0;
-    std::string file_extention = +"_" + std::to_string(file_number) + ".root";
+    std::string file_extention = +"_" + file_number + ".root";
     std::string ex_OutFileName = std::string(OutFileName);
     ex_OutFileName.replace(ex_OutFileName.end() - 5, ex_OutFileName.end(), file_extention);
 
@@ -71,12 +69,25 @@ int main(int argc, char **argv)
     Long64_t nentries = mych_data->GetEntries();
     std::cout << "\n"
               << nentries << "  " << path + "/" + SampleName << "\n";
-    EventLoop *eventLoop = new EventLoop(mych_data, TreeName, OutFileName, config);
+    EventLoop *eventLoop = new EventLoop(mych_data, TreeName, ex_OutFileName, config);
 
     if (mych_data == 0)
       continue;
-    // This takes the entries from mych_data, mych_data is set up in the "main.C" file. These entries are event data, each entry is 1 collition.
+
     Long64_t nbytes = 0, nb = 0;
+
+    if (minEvent == 0 && maxEvent == 0)
+    {
+      minEvent = 0;
+      maxEvent = nentries;
+    }
+    else if (maxEvent > nentries)
+    {
+      maxEvent = nentries;
+    }
+
+    std::cout << "Start Event : " << minEvent << "\n"
+              << "End Event : " << maxEvent << "\n";
 
     for (Long64_t jentry = minEvent; jentry < maxEvent; jentry++)
     {

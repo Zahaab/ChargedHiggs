@@ -168,7 +168,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
                 altrealCutParameters)
 
             cutFlowPath = histoFiles[dataPeriod][data_set][0].replace(
-                "_0.root", "-cutFlow.txt")
+                ".root", "-cutFlow.txt")
             rawCutFlow = open(cutFlowPath, "r")
             rawCutFlow_content = rawCutFlow.read().split("\n")
             realCutFlow_content, cutFlow_content = sortCutContent(
@@ -194,7 +194,7 @@ if config["CSV_FlatCutFlow"] == "Enable" or config["CSV_RealCutFlow"] == "Enable
 
             if config["CSV_AlternateCutFlow"] == "Enable":
                 altcutFlowPath = histoFiles[dataPeriod][data_set][0].replace(
-                    "_0.root", "-cutFlowAlt.txt")
+                    ".root", "-cutFlowAlt.txt")
                 altrawCutFlow = open(altcutFlowPath, "r")
                 altrawCutFlow_content = altrawCutFlow.read().split("\n")
                 altrealCutFlow_content, altcutFlow_content = sortCutContent(
