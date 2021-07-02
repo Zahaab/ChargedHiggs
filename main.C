@@ -69,8 +69,8 @@ int main(int argc, char **argv)
     Long64_t nentries = mych_data->GetEntries();
     std::cout << "\n"
               << nentries << "  " << path + "/" + SampleName << "\n";
+              
     EventLoop *eventLoop = new EventLoop(mych_data, TreeName, ex_OutFileName, config);
-
     if (mych_data == 0)
       continue;
 

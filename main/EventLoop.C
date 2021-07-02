@@ -15,7 +15,6 @@ void EventLoop::analyseEvent()
     {
         pass_sel[sel] = false;
     }
-
     m_NTags = 0;
     m_NTags_caloJ = 0;
     m_NTags_trkJ = 0;
@@ -24,28 +23,23 @@ void EventLoop::analyseEvent()
     m_MassTruth = 0;
     m_EventWeights.clear();
     m_EventWeights.push_back(EventWeight);
-
     SetJetVectors();
     bool status_W = false;
     bool status = false;
     m_mWT = GetMwt();
     m_MassTruth = GetTruthMass();
     Wminus = GetWBoson(status_W);
-
     // Key: Positively or a negatively charged lepton (LepN or LepP), a fat jet ("Merged"),  slimmer jets ("resolved"), background-enriched ("CR"), signal enriched ("SR").
     // This bool ensures that fat or slim jets are passed
-
     bool passed_merged_preselection = PassEventSelectionBoosted(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle, hw_angle, solo_jet_ptv);
     // bool passed_resovled_preselction = PassEventSelectionResolved();
     bool passed_resovled_preselction = false; // My serch is only on the boosted channel
     if (!passed_merged_preselection && !passed_resovled_preselction)
         return;
-
     if (Jets.size() >= 4 && Lepton_Charge < 0)
     {
         MatchTruthParticlesToJets();
     }
-
     if (passed_merged_preselection)
     {
         if (Lepton_Charge > 0)
@@ -80,7 +74,6 @@ void EventLoop::analyseEvent()
             }
         }
     }
-
     if (passed_resovled_preselction && !pass_sel["Merged_LepP_SR"] && !pass_sel["Merged_LepN_SR"])
     {
         if (Lepton_Charge > 0)
@@ -106,35 +99,35 @@ void EventLoop::analyseEvent()
                 pass_sel["Resolved_LepN_CR"] = true;
         }
     }
-
     if (pass_sel["Merged_LepN_CR"] || pass_sel["Resolved_LepN_CR"] || pass_sel["Merged_LepP_CR"] || pass_sel["Resolved_LepP_CR"] || pass_sel["Merged_LepN_SR"] || pass_sel["Resolved_LepN_SR"] || pass_sel["Merged_LepP_SR"] || pass_sel["Resolved_LepP_SR"])
     {
-        // h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
-        // h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
-        // h_Lepton_Pt->Fill(Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_NBtags->Fill(m_NTags, m_EventWeights, pass_sel, m_NTags);
-        // h_Njets->Fill(Jets.size(), m_EventWeights, pass_sel, m_NTags);
-        // h_NFjets->Fill(FJets.size(), m_EventWeights, pass_sel, m_NTags);
-        // h_Mwt->Fill(m_mWT, m_EventWeights, pass_sel, m_NTags);
-        // h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
-        // h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
-        // h_HT_bjets->Fill(m_HT_bjets, m_EventWeights, pass_sel, m_NTags);
-        // h_HT_bjets_Lepton_Pt->Fill(m_HT_bjets + (Lepton4vector->Pt() * 0.001), m_EventWeights, pass_sel, m_NTags);
-        // h_pTWminus->Fill(Wminus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+
+        h_MET->Fill(MET->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_METSig->Fill(METSig, m_EventWeights, pass_sel, m_NTags);
+        h_Lepton_Eta->Fill(Lepton4vector->Eta(), m_EventWeights, pass_sel, m_NTags);
+        h_Lepton_Pt->Fill(Lepton4vector->Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_NBtags->Fill(m_NTags, m_EventWeights, pass_sel, m_NTags);
+        h_Njets->Fill(Jets.size(), m_EventWeights, pass_sel, m_NTags);
+        h_NFjets->Fill(FJets.size(), m_EventWeights, pass_sel, m_NTags);
+        h_Mwt->Fill(m_mWT, m_EventWeights, pass_sel, m_NTags);
+        h_MinDeltaPhiJETMET->Fill(m_min_DeltaPhiJETMET, m_EventWeights, pass_sel, m_NTags);
+        h_HT->Fill(m_HT, m_EventWeights, pass_sel, m_NTags);
+        h_HT_bjets->Fill(m_HT_bjets, m_EventWeights, pass_sel, m_NTags);
+        h_HT_bjets_Lepton_Pt->Fill(m_HT_bjets + (Lepton4vector->Pt() * 0.001), m_EventWeights, pass_sel, m_NTags);
+        h_pTWminus->Fill(Wminus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
         h_mVH->Fill(m_mVH, m_EventWeights, pass_sel, m_NTags);
-        // h_DeltaPhi_HW->Fill(m_DeltaPhi_HW, m_EventWeights, pass_sel, m_NTags);
-        // h_maxMVAResponse->Fill(m_MaxMVA_Response, m_EventWeights, pass_sel, m_NTags);
-        // h_pTH->Fill(Higgs.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_pTWplus->Fill(Wplus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_pTH_over_mVH->Fill(Higgs.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
-        // h_pTW_over_mVH->Fill(Wplus.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
-        // h_mH->Fill(Higgs.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_mWplus->Fill(Wplus.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
-        // h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
-        // h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
-        // h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
-        // h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
+        h_DeltaPhi_HW->Fill(m_DeltaPhi_HW, m_EventWeights, pass_sel, m_NTags);
+        h_maxMVAResponse->Fill(m_MaxMVA_Response, m_EventWeights, pass_sel, m_NTags);
+        h_pTH->Fill(Higgs.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_pTWplus->Fill(Wplus.Pt() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_pTH_over_mVH->Fill(Higgs.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
+        h_pTW_over_mVH->Fill(Wplus.Pt() * 0.001 / m_mVH, m_EventWeights, pass_sel, m_NTags);
+        h_mH->Fill(Higgs.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_mWplus->Fill(Wplus.M() * 0.001, m_EventWeights, pass_sel, m_NTags);
+        h_tagCategory->Fill(m_bTagCategory, m_EventWeights, pass_sel, m_NTags);
+        h_mass_resolution->Fill((m_mVH - m_MassTruth) / m_MassTruth, m_EventWeights, pass_sel, m_NTags);
+        h_MET_over_sqrtHT->Fill((MET->Pt() * 0.001) / (std::sqrt(m_HT)), m_EventWeights, pass_sel, m_NTags);
+        h_m_NTags_trkJ->Fill(m_NTags_trkJ, m_EventWeights, pass_sel, m_NTags);
     }
     //WriteMVAInput();
 }
@@ -193,7 +186,7 @@ void EventLoop::initializeMVA_qqbb()
     m_reader_qqbb->AddVariable("Phi_HW", &m_Phi_HW);
     m_reader_qqbb->AddVariable("H_pT/mass_VH", &m_pTH_over_mvH);
     m_reader_qqbb->AddVariable("Wp_pT/mass_VH", &m_ptW_over_mvH);
-    m_reader_qqbb->BookMVA("BDT", "dataset/weights/TMVAClassificationCategory_WpH_Tagger_v2.weights.xml");
+    // m_reader_qqbb->BookMVA("BDT", "dataset/weights/TMVAClassificationCategory_WpH_Tagger_v2.weights.xml");
 }
 
 void EventLoop::initializeMVA_lvbb()
@@ -205,7 +198,7 @@ void EventLoop::initializeMVA_lvbb()
     m_reader_lvbb->AddVariable("Phi_HW", &m_Phi_HW);
     m_reader_lvbb->AddVariable("pTHmvH", &m_pTH_over_mvH);
     m_reader_lvbb->AddVariable("pTWmvH", &m_ptW_over_mvH);
-    m_reader_lvbb->BookMVA("BDT", "dataset/weights/TMVAClassificationCategory_WpH_Tagger_lvbb.weights.xml");
+    // m_reader_lvbb->BookMVA("BDT", "dataset/weights/TMVAClassificationCategory_WpH_Tagger_lvbb.weights.xml");
 }
 
 double EventLoop::EvaluateMVAResponse_qqbb(int i_H1, int i_H2, int i_w1, int i_w2)
@@ -693,37 +686,29 @@ bool EventLoop::PassEventSelectionBoosted(Float_t met_ptv, Float_t lep_ptv, Floa
     {
         jjbb = false; //Leptonic Channel
     }
-
     SetJetPair();
-
     if (m_NTags == 0 || m_NTags == 1 || m_NTags == -1)
     {
         return false;
     }
-
     CutFlowAssignment(m_TotalEvents, flatCutFlow, realCutFlow);
-
     if (Lepton_Charge < 0 && FJets.size() < 2)
     {
         CutFlowAssignment(m_HadronicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
-
     if (Lepton_Charge > 0 && FJets.size() < 1)
     {
         CutFlowAssignment(m_LeptonicCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
-
     altCutFlow(met_ptv, lep_ptv, jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
                hw_angle, solo_jet_ptv);
-
     if (MET->Pt() < met_ptv || Lepton4vector->Pt() < lep_ptv && Wplus.Pt() < jet1_ptv)
     {
         CutFlowAssignment(m_ChannelFlexCutFlow, flatCutFlow, realCutFlow);
         return false;
     }
-
     return FindFJetPair(jet0_ptv, jet1_ptv, lep_jet0_angle, lep_jet1_angle,
                         hw_angle, solo_jet_ptv);
 }
@@ -866,32 +851,32 @@ void EventLoop ::Sort_Jets(std::vector<TLorentzVector> *Jets, std::vector<int> *
 
 void EventLoop::Write(TDirectory *dir, std::string dirname)
 {
-    // h_MET->Write(dir, ("MET"));
-    // h_METSig->Write(dir, ("METSig"));
-    // h_MinDeltaPhiJETMET->Write(dir, ("MinDeltaPhiJETMET"));
-    // h_Mwt->Write(dir, ("Mwt"));
-    // h_Lepton_Eta->Write(dir, ("Lepton_Eta"));
-    // h_Lepton_Pt->Write(dir, ("Lepton_Pt"));
-    // h_Njets->Write(dir, ("nJets"));
-    // h_NFjets->Write(dir, ("nJets_(Fat)"));
-    // h_NBtags->Write(dir, ("nBTags"));
-    // h_HT->Write(dir, ("HT"));
-    // h_HT_bjets->Write(dir, ("HT_bjets"));
-    // h_HT_bjets_Lepton_Pt->Write(dir, ("HT_bjets_Lepton_Pt"));
+    h_MET->Write(dir, ("MET"));
+    h_METSig->Write(dir, ("METSig"));
+    h_MinDeltaPhiJETMET->Write(dir, ("MinDeltaPhiJETMET"));
+    h_Mwt->Write(dir, ("Mwt"));
+    h_Lepton_Eta->Write(dir, ("Lepton_Eta"));
+    h_Lepton_Pt->Write(dir, ("Lepton_Pt"));
+    h_Njets->Write(dir, ("nJets"));
+    h_NFjets->Write(dir, ("nJets_(Fat)"));
+    h_NBtags->Write(dir, ("nBTags"));
+    h_HT->Write(dir, ("HT"));
+    h_HT_bjets->Write(dir, ("HT_bjets"));
+    h_HT_bjets_Lepton_Pt->Write(dir, ("HT_bjets_Lepton_Pt"));
     h_mVH->Write(dir, ("mVH"));
-    // h_DeltaPhi_HW->Write(dir, ("DeltaPhi_HW"));
-    // h_pTH->Write(dir, ("pTH"));
-    // h_pTH_over_mVH->Write(dir, ("pTH_over_mVH"));
-    // h_pTWplus->Write(dir, ("pTWplus"));
-    // h_pTW_over_mVH->Write(dir, ("pTW_over_mVH"));
-    // h_pTWminus->Write(dir, ("pTWminus"));
-    // h_mH->Write(dir, ("mH"));
-    // h_mWplus->Write(dir, ("mWplus"));
-    // h_maxMVAResponse->Write(dir, ("maxMVAResponse"));
-    // h_tagCategory->Write(dir, ("BtagCategory"));
-    // h_mass_resolution->Write(dir, ("mass_resolution"));
-    // h_MET_over_sqrtHT->Write(dir, ("MET_over_rootHT"));
-    // h_m_NTags_trkJ->Write(dir, ("m_NTags_trkJ"));
+    h_DeltaPhi_HW->Write(dir, ("DeltaPhi_HW"));
+    h_pTH->Write(dir, ("pTH"));
+    h_pTH_over_mVH->Write(dir, ("pTH_over_mVH"));
+    h_pTWplus->Write(dir, ("pTWplus"));
+    h_pTW_over_mVH->Write(dir, ("pTW_over_mVH"));
+    h_pTWminus->Write(dir, ("pTWminus"));
+    h_mH->Write(dir, ("mH"));
+    h_mWplus->Write(dir, ("mWplus"));
+    h_maxMVAResponse->Write(dir, ("maxMVAResponse"));
+    h_tagCategory->Write(dir, ("BtagCategory"));
+    h_mass_resolution->Write(dir, ("mass_resolution"));
+    h_MET_over_sqrtHT->Write(dir, ("MET_over_rootHT"));
+    h_m_NTags_trkJ->Write(dir, ("m_NTags_trkJ"));
     dir->cd();
     //m_myTree->Write();
 }
